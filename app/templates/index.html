@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Flask Page</title>
+</head>
+<body>
+    <h1>Recent Songs</h1>
+    <table border="1">
+        <tr>
+            <th>Time</th>
+            <th>Track</th>
+            <th>Artist</th>
+        </tr>
+        {% for song in recent_songs %}
+        <tr>
+            <td>{{ song.timestamp }}</td>
+            <td>{{ song.track_name }}</td>
+            <td>{{ song.artist_name }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

@@ -26,7 +26,7 @@ def home():
         JOIN track_artists ta ON t.id = ta.track_id
         JOIN artists a ON ta.artist_id = a.id
         ORDER BY p.timestamp DESC
-        LIMIT 5;
+        LIMIT 50;
         """
         recent_songs = fetch_query(query)
         return render_template('index.html', recent_songs=recent_songs)

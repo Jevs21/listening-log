@@ -1,3 +1,5 @@
+{% import "macros/song.html" as song_macros %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,11 +16,7 @@
             <th>Artist</th>
         </tr>
         {% for song in recent_songs %}
-        <tr>
-            <td>{{ song.timestamp }}</td>
-            <td>{{ song.track_name }}</td>
-            <td>{{ song.artist_name }}</td>
-        </tr>
+            {{ song_macros.song_row(song) }}
         {% endfor %}
     </table>
 </body>

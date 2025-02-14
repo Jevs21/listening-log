@@ -8,5 +8,7 @@ services:
         env_file: ./.env
         ports:
             - "80:5000"
+        volumes:
+            - ./database.db:/app/database/database.db
 
         

@@ -1,23 +1,14 @@
-{% import "macros/song.html" as song_macros %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple Flask Page</title>
-</head>
-<body>
-    <h1>Recent Songs</h1>
-    <table border="1">
-        <tr>
-            <th>Time</th>
-            <th>Track</th>
-            <th>Artist</th>
-        </tr>
-        {% for song in recent_songs %}
-            {{ song_macros.song_row(song) }}
+{% import "macros/recent-play-group.html" as recent_play_group %}
+
+{% extends "base.html" %}
+
+{% block title %}Home - My Website{% endblock %}
+
+{% block content %}
+    <div class="container">
+        {% for album_group in history %}
+            {{ recent_play_group.recent_play_group(album_group) }}
         {% endfor %}
-    </table>
-</body>
-</html>
+    </div>
+{% endblock %}

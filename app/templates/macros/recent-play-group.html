@@ -1,0 +1,20 @@
+{% macro recent_play_group(group) %}
+  <div class="recent-play-group">
+    <div class="album-cover-container">
+      <a href="/album?id={{group['songs'][0]['album_id']}}">
+        <img 
+          class="album-cover"
+          src="{{ group['cover_image'] }}" 
+          alt=""/>
+      </a>
+    </div>
+    <div class="song-list-container">
+      {% for song in group['songs'] %}
+        <div class="song-container">
+          <a class="song-name" href="/song?id={{song['id']}}">{{ song['track_name'] }}</a>
+          <div class="song-time">{{ song['timestamp'] | datetimeformat('recent') }}</div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+{% endmacro %}

@@ -1,0 +1,78 @@
+:root {
+  --padding: 6px;
+
+  --bg-color: #f2f2f2;
+  --text-color: #333;
+  --container-bg: #fff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-color: #2e2e2e;
+    --text-color: #f2f2f2;
+    --container-bg: #333;
+  }
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  font-family: 'Poppins', sans-serif;
+}
+h1 {
+  font-family: 'Rubik', sans-serif;
+  padding: var(--padding);
+}
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: all 0.2s ease-in-out;
+}
+a:hover {
+  opacity: 0.8;
+}
+.container {
+
+}
+
+
+/* Recently played page (index) */
+.recent-play-group {
+  display: flex;
+}
+
+.album-cover-container, .song-list-container {
+  display: flex;
+  padding: var(--padding);
+}
+
+.album-cover-container {
+  justify-content: right;
+}
+.album-cover {
+  width: 240px;
+  height: 240px;
+}
+
+.song-list-container {
+  flex: 1;
+  justify-content: left;
+  flex-direction: column;
+}
+
+.song-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+.song-name {
+  font-size: 1rem;
+}
+.song-time {
+  font-size: 0.7rem;
+  opacity: 0.65;
+}
+
+
+

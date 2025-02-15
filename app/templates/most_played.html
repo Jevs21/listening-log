@@ -2,7 +2,53 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <div class="container">
-      
-    </div>
+  <div class="container">
+    <h2>Top 100 Most Played</h2>
+
+    <select id="category-select">
+        <option value="songs">Songs</option>
+        <option value="albums">Albums</option>
+        <option value="artists">Artists</option>
+    </select>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Artist</th>
+                <th>Play Count</th>
+            </tr>
+        </thead>
+        <tbody id="data-table">
+        </tbody>
+    </table>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const categorySelect = document.getElementById("category-select");
+        const tableBody = document.getElementById("data-table");
+
+        function fetchData() {
+            const category = categorySelect.value;
+            fetch(`/top?category=${category}`)
+                .then(response => response.json())
+                .then(data => {
+                    tableBody.innerHTML = "";
+                    data.forEach(item => {
+                        const row = `<tr>
+                            <td>${item.title || 'N/A'}</td>
+                            <td>${item.artist || 'N/A'}</td>
+                            <td>${item.plays}</td>
+                        </tr>`;
+                        tableBody.innerHTML += row;
+                    });
+                })
+                .catch(error => console.error("Error fetching data:", error));
+        }
+
+        categorySelect.addEventListener("change", fetchData);
+        fetchData();
+    });
+  </script>
 {% endblock %}

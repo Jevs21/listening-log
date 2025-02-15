@@ -67,7 +67,7 @@ def home():
                         'cover_image': recent_songs[i]['cover_image'],
                         'songs': [recent_songs[i]]
                     })
-        return render_template('index.html', title="Recent", history=history)
+        return render_template('recent.html', title="Recent", history=history)
     else:
         return redirect('/setup')        
 
@@ -84,6 +84,17 @@ def setup():
     return redirect(spotify.get_auth_redirect_url())
 
 
+@app.route('/most-played')
+def most_played():
+    return render_template('most_played.html', title="Most Played")
+
+
+@app.route('/ratings')
+def ratings():
+    return render_template('ratings.html', title="Ratings")
+
+
+# Single page routes (require valid id, will redirect otherwise)
 @app.route('/song')
 def song():
     track_id = request.args.get('id', '')

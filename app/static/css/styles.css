@@ -1,5 +1,6 @@
 :root {
-  --padding: 6px;
+  --page-width: 60%;
+  --padding: 8px;
 
   --bg-color: #f2f2f2;
   --text-color: #333;
@@ -14,7 +15,27 @@
   }
 }
 
+@media (max-width: 1500px) {
+  :root {
+    --page-width: 76%;
+  }
+}
+
+@media (max-width: 1200px) {
+  :root {
+    --page-width: 84%;
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --page-width: 98%;
+  }
+}
+
 body {
+  max-width: var(--page-width);
+  margin: 0 auto;
   background-color: var(--bg-color);
   color: var(--text-color);
   font-family: 'Poppins', sans-serif;
@@ -65,8 +86,14 @@ h1 {
   justify-content: right;
 }
 .album-cover {
-  width: 240px;
-  height: 240px;
+  width: 180px;
+  height: 180px;
+}
+@media (max-width: 768px) {
+  .album-cover {
+    width: 90px;
+    height: 90px;
+  }
 }
 
 .song-list-container {

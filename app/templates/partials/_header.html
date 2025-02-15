@@ -1,7 +1,16 @@
 <header>
   <nav>
-      <ul>
-          <li><a href="/">Home</a></li>
-      </ul>
+    <h1>{{title}}</h1>
+    <div class="nav-link-container">
+      <a href="{{url_for('home')}}">Recent</a>
+      <div class='dot'>&#183;</div>
+      <a href="{{url_for('home')}}">Tracks</a>
+      <div class='dot'>&#183;</div>
+      <a href="{{url_for('home')}}">Albums</a>
+      <div class='dot'>&#183;</div>
+      <a href="{{url_for('home')}}">Artists</a>
+      <div class='dot'>&#183;</div>
+      <a href="{{url_for('home')}}">Ratings</a>
+    </div>
   </nav>
 </header>

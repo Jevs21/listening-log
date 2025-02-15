@@ -67,7 +67,7 @@ def home():
                         'cover_image': recent_songs[i]['cover_image'],
                         'songs': [recent_songs[i]]
                     })
-        return render_template('index.html', history=history)
+        return render_template('index.html', title="Recents", history=history)
     else:
         return redirect('/setup')        
 

@@ -11,7 +11,7 @@
     <div class="song-list-container">
       {% for song in group['songs'] %}
         <div class="song-container">
-          <a class="song-name" href="/song?id={{song['id']}}">{{ song['track_name'] }}</a>
+          <a class="song-name" href="/song?id={{song['track_id']}}">{{ song['track_name'] }}</a>
           <div class="song-time">{{ song['timestamp'] | datetimeformat('recent') }}</div>
         </div>
       {% endfor %}

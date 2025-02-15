@@ -67,7 +67,7 @@ def home():
                         'cover_image': recent_songs[i]['cover_image'],
                         'songs': [recent_songs[i]]
                     })
-        return render_template('index.html', title="Recents", history=history)
+        return render_template('index.html', title="Recent", history=history)
     else:
         return redirect('/setup')        
 
@@ -82,6 +82,39 @@ def setup():
         return redirect('/')
 
     return redirect(spotify.get_auth_redirect_url())
+
+
+@app.route('/song')
+def song():
+    track_id = request.args.get('id', '')
+    if not track_id:
+        return redirect('/')
+    
+    song = fetch_query(f"SELECT * FROM tracks WHERE id='{track_id}'")
+    logging.info(song)
+    return render_template('song.html', title=song[0]['name'], song=song)
+
+
+@app.route('/album')
+def album():
+    album_id = request.args.get('id', '')
+    if not album_id:
+        return redirect('/')
+    
+    song = fetch_query(f"SELECT * FROM albums WHERE id='{album_id}'")
+    logging.info(song)
+    return render_template('album.html', title="Album", album=album)
+
+
+@app.route('/artist')
+def artist():
+    artist_id = request.args.get('id', '')
+    if not artist_id:
+        return redirect('/')
+    
+    song = fetch_query(f"SELECT * FROM artists WHERE id='{artist_id}'")
+    logging.info(song)
+    return render_template('artist.html', title="Artist", artist=artist)
 
 
 if __name__ == '__main__':

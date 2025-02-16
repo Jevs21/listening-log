@@ -46,3 +46,11 @@ CREATE TABLE play_history (
     track_id TEXT NOT NULL,
     FOREIGN KEY (track_id) REFERENCES tracks(id) ON DELETE CASCADE
 );
+
+CREATE TABLE spotify_auth (
+    id INTEGER PRIMARY KEY CHECK (id = 1),  -- Ensures a single row (ID always 1)
+    access_token TEXT NOT NULL,
+    refresh_token TEXT NOT NULL,
+    expiry INTEGER NOT NULL 
+);
+INSERT INTO spotify_auth (id, access_token, refresh_token, expires_at) VALUES (1, '', '', 0);

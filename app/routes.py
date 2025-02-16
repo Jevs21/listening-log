@@ -1,9 +1,8 @@
 import logging
 from flask import Blueprint, render_template, current_app, redirect, request
-from database.database import fetch_query
+from db.database import fetch_query
 
 main = Blueprint('main', __name__)
-
 
 @main.route('/')
 def home():

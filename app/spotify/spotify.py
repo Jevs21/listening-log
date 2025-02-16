@@ -3,7 +3,7 @@ import time
 import requests
 import logging
 from urllib.parse import urlencode
-from database.database import insert_playback_data
+from db.database import insert_playback_data
 
 logging.basicConfig(level=logging.INFO)
 
@@ -13,15 +13,21 @@ REDIRECT_URI = "http://localhost/setup" # TODO: Change this
 SCOPE = "user-read-currently-playing"
 
 class SpotifyController:
-    def __init__(self):
+    def __init__(self, db_auth_data):
         self.is_authenticated = False
-        self.auth_code = None
-        self.headers = None
-        self.expiry = 0
-        self.refresh_tok = None
+        self.auth_code    = ""
+        self.access_token = ""
+        self.refresh_tok  = ""
+        self.expiry       = 0
+
+        if len(db_auth_data) == 1:
+            self.is_authenticated = True # Will refresh if it needs it
+            self.access_token     = db_auth_data[0]['access_token']
+            self.refresh_token    = db_auth_data[0]['refresh_token']
+            self.expiry           = int(db_auth_data[0]['expiry'])
 
     def __repr__(self):
-        return f"Header: {self.headers}, Expiry: {self.expiry}, Refresh Tok: {self.refresh_tok}"
+        return f"Spotify(auth={self.is_authenticated},expiry={self.expiry})"
  
     def get_auth_redirect_url(self):
         params = { 
@@ -40,25 +46,30 @@ class SpotifyController:
             self.auth_code = code
         
         headers = { "Content-Type": "application/x-www-form-urlencoded" }
-        payload = { 
-            "grant_type": "authorization_code", 
-            "code": self.auth_code,
-            "redirect_uri": REDIRECT_URI, 
-            "client_id": CLIENT_ID, 
-            "client_secret": CLIENT_SECRET 
-        } if not refresh else {
-            "grant_type": "refresh_token",
-            "refresh_token": self.refresh_tok,
-            "client_id": CLIENT_ID
-        }
-
+        payload = {}
+        if refresh:
+            payload = {
+                "grant_type": "refresh_token",
+                "refresh_token": self.refresh_tok,
+                "client_id": CLIENT_ID
+            }
+        else:
+            payload = { 
+                "grant_type": "authorization_code", 
+                "code": self.auth_code,
+                "redirect_uri": REDIRECT_URI, 
+                "client_id": CLIENT_ID, 
+                "client_secret": CLIENT_SECRET 
+            }
+        
         response = requests.post("https://accounts.spotify.com/api/token", headers=headers, data=payload)
 
         response.raise_for_status()
         data = response.json()
-        self.headers = { "Authorization": f"{data['token_type']} {data['access_token']}" }
-        self.expiry = time.time() + data['expires_in']
+
+        self.access_token = data['access_token']
         self.refresh_tok = data['refresh_token']
+        self.expiry = time.time() + data['expires_in']
         self.is_authenticated = True
     
 
@@ -71,7 +82,8 @@ class SpotifyController:
             self.authenticate(refresh=True)
             return
 
-        response = requests.get("https://api.spotify.com/v1/me/player/currently-playing", headers=self.headers)
+        headers = { "Authorization": f"Bearer {self.access_token}"}
+        response = requests.get("https://api.spotify.com/v1/me/player/currently-playing", headers=headers)
         if response.status_code == 204:
             logging.info("No song playing")
             return

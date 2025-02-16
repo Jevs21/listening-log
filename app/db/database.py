@@ -4,23 +4,64 @@ import logging
 from datetime import datetime
 
 DB_FILE = "database/database.db"
-SCHEMA_FILE = "database/schema.sql"
+SCHEMA_FILE = "db/schema.sql"
 
 def initialize_database():
-    if not os.path.exists(DB_FILE):
-        logging.info("Database not found. Creating a new one...")
-        conn = sqlite3.connect(DB_FILE)
-        cursor = conn.cursor()
+    """Ensure the SQLite database exists and is initialized properly."""
+    db_dir = os.path.dirname(DB_FILE)
+    
+    if not os.path.exists(db_dir):
+        logging.info(f"Creating database directory: {db_dir}")
+        os.makedirs(db_dir, exist_ok=True)
 
+    def create_db():
+        """Creates and initializes the database from the schema file."""
         try:
+            logging.info("Creating a new database...")
+            conn = sqlite3.connect(DB_FILE)
+            cursor = conn.cursor()
+            
             with open(SCHEMA_FILE, "r") as f:
                 schema = f.read()
             cursor.executescript(schema)
             conn.commit()
+
+            logging.info("Database initialized successfully.")
         except sqlite3.Error as e:
             logging.error(f"SQLite error during initialization: {str(e)}")
-        finally:
-            conn.close()
+            return False 
+
+        conn.close()
+        
+        return True 
+
+    # First attempt to create the DB
+    if not os.path.exists(DB_FILE) or not create_db():
+        logging.warning("Database initialization failed. Deleting and retrying...")
+        
+        # Remove the corrupted database and try again
+        if os.path.exists(DB_FILE):
+            os.remove(DB_FILE)
+
+        if not create_db():
+            logging.critical("Database creation failed twice. Check your schema file and permissions.")
+
+
+# def initialize_database():
+#     if not os.path.exists(DB_FILE):
+#         logging.info("Database not found. Creating a new one...")
+#         conn = sqlite3.connect(DB_FILE)
+#         cursor = conn.cursor()
+
+#         try:
+#             with open(SCHEMA_FILE, "r") as f:
+#                 schema = f.read()
+#             cursor.executescript(schema)
+#             conn.commit()
+#         except sqlite3.Error as e:
+#             logging.error(f"SQLite error during initialization: {str(e)}")
+#         finally:
+#             conn.close()
 
 def fetch_query(query, params=()):
     conn = sqlite3.connect(DB_FILE)

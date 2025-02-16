@@ -1,5 +1,8 @@
 version: '3'
 
+volumes:
+    db_data:
+
 services:
     app:
         build: ./app
@@ -11,7 +14,7 @@ services:
         volumes:
             - ./app/static/:/app/static/ # Dev only
             - ./app/templates/:/app/templates/ # Dev only
-            - ./database.db:/app/database/database.db
+            - db_data:/app/database/
 
 
         

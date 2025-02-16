@@ -56,7 +56,7 @@ def home():
 def setup():
     code = request.args.get('code', '')
     if code:
-        current_app.spotify.authenticate(code)
+        current_app.spotify.authenticate(refresh=False, code=code)
     
     if current_app.spotify.is_authenticated:
         return redirect('/')

@@ -3,7 +3,7 @@ import time
 import requests
 import logging
 from urllib.parse import urlencode
-from db.database import insert_playback_data
+from db.database import insert_playback_data, get_spotify_creds, set_spotify_creds
 
 logging.basicConfig(level=logging.INFO)
 
@@ -13,18 +13,19 @@ REDIRECT_URI = "http://localhost/setup" # TODO: Change this
 SCOPE = "user-read-currently-playing"
 
 class SpotifyController:
-    def __init__(self, db_auth_data):
+    def __init__(self):
         self.is_authenticated = False
         self.auth_code    = ""
         self.access_token = ""
         self.refresh_tok  = ""
         self.expiry       = 0
 
-        if len(db_auth_data) == 1:
+        auth_data = get_spotify_creds()
+        if auth_data:
             self.is_authenticated = True # Will refresh if it needs it
-            self.access_token     = db_auth_data[0]['access_token']
-            self.refresh_token    = db_auth_data[0]['refresh_token']
-            self.expiry           = int(db_auth_data[0]['expiry'])
+            self.access_token     = auth_data['access_token']
+            self.refresh_token    = auth_data['refresh_token']
+            self.expiry           = auth_data['expiry']
 
     def __repr__(self):
         return f"Spotify(auth={self.is_authenticated},expiry={self.expiry})"
@@ -38,6 +39,7 @@ class SpotifyController:
         }
         return f"https://accounts.spotify.com/authorize?{urlencode(params)}"
 
+    def set_auth_data()
     def has_token_expired(self):
         return time.time() > self.expiry
 
@@ -47,7 +49,7 @@ class SpotifyController:
         
         headers = { "Content-Type": "application/x-www-form-urlencoded" }
         payload = {}
-        if refresh:
+        if refresh and self.refresh_tok:
             payload = {
                 "grant_type": "refresh_token",
                 "refresh_token": self.refresh_tok,
@@ -62,8 +64,9 @@ class SpotifyController:
                 "client_secret": CLIENT_SECRET 
             }
         
+        logging.info(f"Using {payload}")
         response = requests.post("https://accounts.spotify.com/api/token", headers=headers, data=payload)
-
+        # try:
         response.raise_for_status()
         data = response.json()
 
@@ -71,6 +74,8 @@ class SpotifyController:
         self.refresh_tok = data['refresh_token']
         self.expiry = time.time() + data['expires_in']
         self.is_authenticated = True
+        # except e:
+        #     self.is_authenticated = False
     
 
     def get_now_playing(self):

@@ -21,7 +21,7 @@ from api import api as api_blueprint
 app = Flask(__name__)
 app.register_blueprint(main_blueprint)
 app.register_blueprint(api_blueprint, url_prefix='/api')
-app.spotify = SpotifyController(fetch_query("SELECT * FROM spotify_auth"))
+app.spotify = SpotifyController()
 
 scheduler = BackgroundScheduler()
 scheduler.add_job(app.spotify.get_now_playing, 'interval', seconds=20)

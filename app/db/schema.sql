@@ -1,4 +1,4 @@
-CREATE TABLE albums (
+CREATE TABLE IF NOT EXISTS albums (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
     release_date DATE,
@@ -7,13 +7,13 @@ CREATE TABLE albums (
     cover_image TEXT
 );
 
-CREATE TABLE artists (
+CREATE TABLE IF NOT EXISTS artists (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
     spotify_url TEXT
 );
 
-CREATE TABLE tracks (
+CREATE TABLE IF NOT EXISTS tracks (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
     duration_ms INTEGER,
@@ -25,7 +25,7 @@ CREATE TABLE tracks (
     FOREIGN KEY (album_id) REFERENCES albums(id) ON DELETE CASCADE
 );
 
-CREATE TABLE track_artists (
+CREATE TABLE IF NOT EXISTS track_artists (
     track_id TEXT NOT NULL,
     artist_id TEXT NOT NULL,
     PRIMARY KEY (track_id, artist_id),
@@ -33,7 +33,7 @@ CREATE TABLE track_artists (
     FOREIGN KEY (artist_id) REFERENCES artists(id) ON DELETE CASCADE
 );
 
-CREATE TABLE play_history (
+CREATE TABLE IF NOT EXISTS play_history (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
     progress_ms INTEGER,
@@ -47,10 +47,12 @@ CREATE TABLE play_history (
     FOREIGN KEY (track_id) REFERENCES tracks(id) ON DELETE CASCADE
 );
 
-CREATE TABLE spotify_auth (
+CREATE TABLE IF NOT EXISTS spotify_auth (
     id INTEGER PRIMARY KEY CHECK (id = 1),  -- Ensures a single row (ID always 1)
     access_token TEXT NOT NULL,
     refresh_token TEXT NOT NULL,
     expiry INTEGER NOT NULL 
 );
-INSERT INTO spotify_auth (id, access_token, refresh_token, expires_at) VALUES (1, '', '', 0);
+INSERT INTO spotify_auth (id, access_token, refresh_token, expiry) 
+SELECT 1, '', '', 0 
+WHERE NOT EXISTS (SELECT 1 FROM spotify_auth WHERE id = 1);

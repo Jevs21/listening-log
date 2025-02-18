@@ -170,4 +170,5 @@ def insert_playback_data(data):
         print("SQLite error:", e)
         conn.rollback()
     finally:
+        logging.info(f"logged {track_name}")
         conn.close()

@@ -7,7 +7,7 @@ services:
         restart: unless-stopped
         env_file: ./.env
         ports:
-            - "80:5000"
+            - "5001:5000"
         volumes:
             - ./app/static/:/app/static/ # Dev only
             - ./app/templates/:/app/templates/ # Dev only

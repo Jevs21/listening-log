@@ -1,9 +1,8 @@
 import logging
 from flask import Blueprint, render_template, current_app, redirect, request
-from database.database import fetch_query
+from db.database import fetch_query
 
 main = Blueprint('main', __name__)
-
 
 @main.route('/')
 def home():
@@ -56,7 +55,7 @@ def home():
 def setup():
     code = request.args.get('code', '')
     if code:
-        current_app.spotify.authenticate(code)
+        current_app.spotify.authenticate(refresh=False, code=code)
     
     if current_app.spotify.is_authenticated:
         return redirect('/')

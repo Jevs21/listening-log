@@ -1,9 +1,10 @@
 import logging
 from flask import Flask, render_template, redirect, request
 from apscheduler.schedulers.background import BackgroundScheduler
+logging.getLogger("apscheduler").setLevel(logging.WARNING) # suppresses some logs
 
 from filters.filters import datetimeformat
-from database.database import initialize_database
+from db.database import initialize_database, fetch_query
 from spotify.spotify import SpotifyController
 
 logging.basicConfig(
@@ -32,4 +33,4 @@ def datetimeformatfilter(value, f='%b %d, %Y'):
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True, use_reloader=False)

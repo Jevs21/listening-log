@@ -3,24 +3,24 @@ import sqlite3
 import logging
 from datetime import datetime
 
-DB_FILE = "database/database.db"
-SCHEMA_FILE = "database/schema.sql"
+DB_FILE = "db/db/database.db"
+SCHEMA_FILE = "db/schema.sql"
 
 def initialize_database():
-    if not os.path.exists(DB_FILE):
-        logging.info("Database not found. Creating a new one...")
-        conn = sqlite3.connect(DB_FILE)
-        cursor = conn.cursor()
+    logging.info("Initializing database.")
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
 
-        try:
-            with open(SCHEMA_FILE, "r") as f:
-                schema = f.read()
-            cursor.executescript(schema)
-            conn.commit()
-        except sqlite3.Error as e:
-            logging.error(f"SQLite error during initialization: {str(e)}")
-        finally:
-            conn.close()
+    try:
+        with open(SCHEMA_FILE, "r") as f:
+            schema = f.read()
+        cursor.executescript(schema)
+        conn.commit()
+    except sqlite3.Error as e:
+        logging.error(f"SQLite error during initialization: {str(e)}")
+    finally:
+        conn.close()
+
 
 def fetch_query(query, params=()):
     conn = sqlite3.connect(DB_FILE)
@@ -39,6 +39,46 @@ def fetch_query(query, params=()):
     
     return []
     
+
+def execute_query(query, params=()):
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute(query, params)
+        conn.commit()
+        return True
+    except sqlite3.Error as e:
+        logging.error(f"execute_query error: {e}")
+        conn.rollback()
+        return False
+    finally:
+        conn.close()
+
+
+def get_spotify_creds():
+    creds = fetch_query("SELECT * FROM spotify_auth")
+    if (len(creds) != 1):
+        logging.error("Invalid spotify credentials. Database failed to initialize")
+        return None
+    return {
+        "access_token": creds[0]['access_token'],
+        "refresh_token": creds[0]['refresh_token'],
+        "expiry": int(creds[0]['expiry']),
+    }
+
+
+def set_spotify_creds(access, refresh, expiry):
+    query = """
+        INSERT INTO spotify_auth (id, access_token, refresh_token, expiry)
+        VALUES (1, ?, ?, ?)
+        ON CONFLICT(id) DO UPDATE 
+        SET access_token = excluded.access_token,
+            refresh_token = excluded.refresh_token,
+            expiry = excluded.expiry;
+    """
+    return execute_query(query, (access, refresh, expiry))
+
 
 def insert_playback_data(data):
     """Inserts Spotify playback data into the SQLite database."""
@@ -130,4 +170,5 @@ def insert_playback_data(data):
         print("SQLite error:", e)
         conn.rollback()
     finally:
+        logging.info(f"logged {track_name}")
         conn.close()

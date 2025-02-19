@@ -74,8 +74,11 @@ h1 {
   align-items: center;
   gap: 10px;
 }
-.nav-link-container a {
+.nav-link {
   font-size: 1.3em;
+}
+.active-nav-link {
+  text-decoration: underline;
 }
 .dot {
   font-size: var(--font-sz-xl);

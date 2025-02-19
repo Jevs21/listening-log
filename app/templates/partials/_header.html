@@ -2,15 +2,25 @@
   <nav>
     <h1>{{title}}</h1>
     <div class="nav-link-container">
-      <a href="{{url_for('main.home')}}">Recent</a>
+      <a 
+        href="{{url_for('main.home')}}"
+        class="nav-link {% if request.path == url_for('main.home') %}active-nav-link{% endif %}"
+      >Recent</a>
       <div class='dot'>&#183;</div>
-      <a href="{{url_for('main.song')}}">Songs</a>
+      <a 
+        href="{{url_for('main.most_played')}}"
+        class="nav-link {% if request.path == url_for('main.most_played') %}active-nav-link{% endif %}"
+      >Most Played</a>
       <div class='dot'>&#183;</div>
-      <a href="{{url_for('main.album')}}">Albums</a>
+      <a 
+        href="{{url_for('main.all')}}"
+        class="nav-link {% if request.path == url_for('main.all') %}active-nav-link{% endif %}"
+      >All</a>
       <div class='dot'>&#183;</div>
-      <a href="{{url_for('main.artist')}}">Artists</a>
-      <div class='dot'>&#183;</div>
-      <a href="{{url_for('main.home')}}">Ratings</a>
+      <a 
+        href="{{url_for('main.ratings')}}"
+        class="nav-link {% if request.path == url_for('main.ratings') %}active-nav-link{% endif %}"
+      >Ratings</a>
     </div>
   </nav>
 </header>

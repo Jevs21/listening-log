@@ -15,6 +15,7 @@ def home():
             alb.cover_image, 
             t.id as track_id,
             alb.id as album_id,
+            alb.name as album_name,
             a.id as artist_id
         FROM play_history p
         JOIN tracks t ON p.track_id = t.id

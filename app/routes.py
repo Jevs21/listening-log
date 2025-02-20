@@ -73,6 +73,10 @@ def most_played():
 def ratings():
     return render_template('ratings.html', title="Ratings")
 
+@main.route('/all')
+def all():
+    return render_template('ratings.html', title="All")
+
 
 # Single page routes (require valid id, will redirect otherwise)
 @main.route('/song')

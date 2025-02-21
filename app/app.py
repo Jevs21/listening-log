@@ -3,7 +3,7 @@ from flask import Flask, render_template, redirect, request
 from apscheduler.schedulers.background import BackgroundScheduler
 logging.getLogger("apscheduler").setLevel(logging.WARNING) # suppresses some logs
 
-from filters.filters import datetimeformat
+from server.filters import datetimeformat
 from db.database import initialize_database, fetch_query
 from spotify.spotify import SpotifyController
 
@@ -15,8 +15,8 @@ logging.basicConfig(
 
 initialize_database()
 
-from routes import main as main_blueprint
-from api import api as api_blueprint
+from server.routes import main as main_blueprint
+from server.api import api as api_blueprint
 
 app = Flask(__name__)
 app.register_blueprint(main_blueprint)

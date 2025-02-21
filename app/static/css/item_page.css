@@ -1,0 +1,28 @@
+
+.container {
+  display: flex;
+  flex-direction: row;
+}
+
+.image-container {
+  flex-grow: 1;
+}
+.image {
+  width: 100%;
+  height: 100%;
+}
+
+.info-container {
+  flex-grow: 2;
+}
+
+.page-title {
+  font-size: var(--font-sz-lg);
+  font-weight: var(--font-wt-lg);
+}
+
+.page-subtitle {
+  font-size: var(--font-sz-md);
+  font-weight: var(--font-wt-sm);
+  opacity: var(--std-opacity);
+}

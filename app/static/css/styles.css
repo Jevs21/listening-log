@@ -1,5 +1,5 @@
 :root {
-  --page-width: 60%;
+  --page-width: 1200px;
   --padding: 8px;
 
   --bg-color: #f2f2f2;
@@ -8,10 +8,13 @@
   --std-opacity: 0.7;
 
   /* Font sizing */
-  --font-sz-xl: 3rem;
+  --font-sz-xl: 2.7rem;
   --font-sz-lg: 1.2rem;
   --font-sz-md: 1rem;
   --font-sz-sm: 0.8rem;
+  --font-wt-lg: 500;
+  --font-wt-md: 300;
+  --font-wt-sm: 200;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -24,13 +27,13 @@
 
 @media (max-width: 1500px) {
   :root {
-    --page-width: 76%;
+    --page-width: 1000px;
   }
 }
 
 @media (max-width: 1200px) {
   :root {
-    --page-width: 84%;
+    --page-width: 700px;
   }
 }
 
@@ -40,6 +43,9 @@
   }
 }
 
+html {
+  overflow-y: scroll;
+}
 body {
   max-width: var(--page-width);
   margin: 0 auto;
@@ -55,27 +61,28 @@ a {
 a:hover {
   opacity: 0.8;
 }
-.container {
-
-}
 
 /* Nav */
 nav {
-  padding: var(--padding);
+  padding: var(--padding) 0;
+  margin: 30px 0 40px 0;
+  text-align: center;
 }
 h1 {
   margin: 0px;
   font-family: 'Rubik', sans-serif;
   font-size: var(--font-sz-xl);
+  font-weight: var(--font-wt-lg);
 }
 .nav-link-container {
   display: flex;
   flex-direction: row;
+  justify-content: center;
   align-items: center;
   gap: 10px;
 }
 .nav-link {
-  font-size: 1.3em;
+  font-size: var(--font-sz-md);
 }
 .active-nav-link {
   text-decoration: underline;
@@ -89,7 +96,7 @@ h1 {
 .recent-play-group {
   display: flex;
 }
-.album-cover-container, .song-list-container {
+.album-cover-container, .recent-song-list-container {
   display: flex;
   padding: var(--padding);
 }
@@ -106,30 +113,30 @@ h1 {
     height: 90px;
   }
 }
-.song-list-container {
+.recent-song-list-container {
   flex: 1;
   justify-content: left;
   flex-direction: column;
   margin-bottom: 20px;
 }
 
-.song-name-container {
+.recent-song-name-container {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
 }
-.song-artist, .song-album {
+.recent-song-artist, .recent-song-album {
   opacity: var(--std-opacity);
   font-size: var(--font-sz-md);
   margin-bottom: 4px;
 }
-.song-name {
+.recent-song-name {
   font-size: var(--font-sz-lg);
   line-height: 1.55rem;
-  font-weight: 300;
+  font-weight: var(--font-wt-md);
 }
-.song-time {
+.recent-song-time {
   font-size: var(--font-sz-sm);
   opacity: var(--std-opacity);
 }

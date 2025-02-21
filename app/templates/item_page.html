@@ -1,0 +1,26 @@
+
+{% extends "base.html" %}
+
+{% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/item_page.css') }}">
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="image-container">
+            <img class="image" src="{{image_url}}" alt="{{ item['name'] }}"/>
+        </div>
+        <div class="info-container">
+            {% if item_type == "song" %}
+                <div>song</div>
+            {% elif item_type == "album" %}
+                <div>album</div>
+            {% else %}
+                <div>artist<div>
+            {% endif %}
+            <div class="page-title">{{ item['name'] }}</div>
+            <div class="page-subtitle">{{ item['artist_name'] }}</div>
+        </div>
+        
+    </div>
+{% endblock %}

@@ -5,6 +5,7 @@
   gap: calc(var(--padding) * 2);
 }
 
+
 .image-container {
   flex: 1;
 }

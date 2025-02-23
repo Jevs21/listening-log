@@ -10,10 +10,12 @@ class SongController:
         query = """
             SELECT
                 t.name as name,
-                a.name as artist_name
+                a.name as artist_name,
+                alb.cover_image
             FROM tracks t
             JOIN track_artists ta ON t.id = ta.track_id
             JOIN artists a ON ta.artist_id = a.id
+            JOIN albums alb ON t.album_id = alb.id
             WHERE t.id = ?
         """
         song = fetch_query(query, (song_id,))

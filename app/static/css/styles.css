@@ -25,19 +25,19 @@
   }
 }
 
-@media (max-width: 1500px) {
+@media (max-width: 1500px) { /* breakpoint-lg */
   :root {
     --page-width: 1000px;
   }
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 1200px) { /* breakpoint-md */
   :root {
     --page-width: 700px;
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 700px) { /* breakpoint-sm */
   :root {
     --page-width: 98%;
   }

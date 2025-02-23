@@ -2,10 +2,11 @@
 .container {
   display: flex;
   flex-direction: row;
+  gap: calc(var(--padding) * 2);
 }
 
 .image-container {
-  flex-grow: 1;
+  flex: 1;
 }
 .image {
   width: 100%;
@@ -13,7 +14,7 @@
 }
 
 .info-container {
-  flex-grow: 2;
+  flex: 3;
 }
 
 .page-title {
@@ -25,4 +26,13 @@
   font-size: var(--font-sz-md);
   font-weight: var(--font-wt-sm);
   opacity: var(--std-opacity);
+}
+
+@media (max-width: 700px) { /* breakpoint-sm */
+  .container {
+    flex-direction: column; 
+  }
+  .image {
+    padding: calc(var(--padding) * 2);
+  }
 }

@@ -20,6 +20,16 @@
             {% endif %}
             <div class="page-title">{{ item['name'] }}</div>
             <div class="page-subtitle">{{ item['artist_name'] }}</div>
+
+
+            {% if item_type == "album" %}
+                <div class="album-songlist-container">
+                    {% for track in item['tracks'] %}
+                        <a href="/song?id={{track['id']}}">{{ track['track_number'] }} {{ track['name'] }}</a><br>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
         </div>
         
     </div>

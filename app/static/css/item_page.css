@@ -37,3 +37,9 @@
     padding: calc(var(--padding) * 2);
   }
 }
+
+/* Album page specific */
+
+.album-songlist-container {
+  padding: var(--padding);
+}

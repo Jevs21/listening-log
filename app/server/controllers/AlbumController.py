@@ -11,5 +11,12 @@ class AlbumController:
         album = fetch_query("SELECT * FROM albums WHERE id = ?", (album_id,))
         if not album or len(album) != 1:
             raise AlbumControllerException(f"Error retrieving Album by id: {album_id}")
-
-        return album[0]
+        
+        tracks = fetch_query("SELECT * FROM tracks WHERE album_id = ? ORDER BY track_number", (album_id,))
+        if not tracks or len(tracks) == 0:
+            raise AlbumControllerException(f"Error retrieving tracks for {album[0]['name']}")
+        
+        return { 
+            **album[0],
+            "tracks": tracks
+        }

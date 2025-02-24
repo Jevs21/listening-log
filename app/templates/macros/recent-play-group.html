@@ -8,16 +8,16 @@
           alt=""/>
       </a>
     </div>
-    <div class="song-list-container">
-      <div class="song-artist">
-        <a class="song-artist" href="/artist?id={{ group['songs'][0]['artist_id']}}">{{ group['songs'][0]['artist_name'] }}</a>
+    <div class="recent-song-list-container">
+      <div>
+        <a class="recent-song-artist" href="/artist?id={{ group['songs'][0]['artist_id']}}">{{ group['songs'][0]['artist_name'] }}</a>
         -
-        <a class="song-album" href="/album?id={{ group['songs'][0]['album_id']}}">{{ group['songs'][0]['album_name'] }}</a>
+        <a class="recent-song-album" href="/album?id={{ group['songs'][0]['album_id']}}">{{ group['songs'][0]['album_name'] }}</a>
       </div>
       {% for song in group['songs'] %}
-        <div class="song-name-container">
-          <a class="song-name" href="/song?id={{song['track_id']}}">{{ song['track_name'] }}</a>
-          <div class="song-time">{{ song['timestamp'] | datetimeformat('recent') }}</div>
+        <div class="recent-song-name-container">
+          <a class="recent-song-name" href="/song?id={{song['track_id']}}">{{ song['track_name'] }}</a>
+          <div class="recent-song-time">{{ song['timestamp'] | datetimeformat('recent') }}</div>
         </div>
       {% endfor %}
     </div>

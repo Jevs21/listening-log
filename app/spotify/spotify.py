@@ -6,6 +6,7 @@ import base64
 from urllib.parse import urlencode
 from db.database import insert_playback_data, get_spotify_creds, set_spotify_creds
 
+
 logging.basicConfig(level=logging.INFO)
 
 CLIENT_ID = os.getenv("CLIENT_ID")

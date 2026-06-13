@@ -1,0 +1,87 @@
+package handlers
+
+import (
+	"crypto/rand"
+	"database/sql"
+	"encoding/hex"
+	"log"
+	"net/http"
+
+	"listening-log/server/config"
+	"listening-log/server/db"
+	"listening-log/server/spotify"
+
+	"github.com/gin-gonic/gin"
+)
+
+type AuthHandler struct {
+	DB  *sql.DB
+	Cfg config.Config
+}
+
+func (h *AuthHandler) Login(c *gin.Context) {
+	state := randomState()
+	c.SetSameSite(http.SameSiteLaxMode)
+	c.SetCookie("oauth_state", state, 300, "/", "127.0.0.1", false, true)
+	url := spotify.AuthorizeURL(h.Cfg.ClientID, h.Cfg.SpotifyRedirectURI, state)
+	c.Redirect(http.StatusFound, url)
+}
+
+func (h *AuthHandler) Callback(c *gin.Context) {
+	// Verify state
+	cookieState, err := c.Cookie("oauth_state")
+	if err != nil || cookieState != c.Query("state") {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "state mismatch"})
+		return
+	}
+
+	// Clear the state cookie
+	c.SetSameSite(http.SameSiteLaxMode)
+	c.SetCookie("oauth_state", "", -1, "/", "127.0.0.1", false, true)
+
+	code := c.Query("code")
+	if code == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "missing code"})
+		return
+	}
+
+	token, err := spotify.ExchangeCode(h.Cfg.ClientID, h.Cfg.ClientSecret, code, h.Cfg.SpotifyRedirectURI)
+	if err != nil {
+		log.Printf("token exchange error: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "token exchange failed"})
+		return
+	}
+
+	err = db.UpsertAuth(h.DB, db.SpotifyAuth{
+		AccessToken:  token.AccessToken,
+		RefreshToken: token.RefreshToken,
+		Scope:        token.Scope,
+		Expiry:       spotify.ExpiryFromNow(token.ExpiresIn),
+	})
+	if err != nil {
+		log.Printf("db upsert error: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to save tokens"})
+		return
+	}
+
+	c.Redirect(http.StatusFound, h.Cfg.ClientBaseURL)
+}
+
+func (h *AuthHandler) Status(c *gin.Context) {
+	connected, err := db.IsConnected(h.DB)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "db error"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"connected": connected})
+}
+
+func Health(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"status": "ok"})
+}
+
+func randomState() string {
+	b := make([]byte, 16)
+	rand.Read(b)
+	return hex.EncodeToString(b)
+}

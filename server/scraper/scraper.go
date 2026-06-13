@@ -12,15 +12,20 @@ import (
 	"listening-log/server/spotify"
 )
 
-func Poll(database *sql.DB, cfg config.Config) {
+const (
+	PollIntervalActive = 10 * time.Second
+	PollIntervalIdle   = 45 * time.Second
+)
+
+func Poll(database *sql.DB, cfg config.Config) bool {
 	auth, err := db.ReadAuth(database)
 	if err != nil {
 		log.Printf("scraper: error reading auth: %v", err)
-		return
+		return false
 	}
 
 	if auth.RefreshToken == "" {
-		return
+		return false
 	}
 
 	// Refresh token if expired or within 60s of expiry
@@ -28,7 +33,7 @@ func Poll(database *sql.DB, cfg config.Config) {
 		token, err := spotify.RefreshToken(cfg.ClientID, cfg.ClientSecret, auth.RefreshToken)
 		if err != nil {
 			log.Printf("scraper: error refreshing token: %v", err)
-			return
+			return false
 		}
 		expiry := spotify.ExpiryFromNow(token.ExpiresIn)
 		if err := db.UpsertAuth(database, db.SpotifyAuth{
@@ -38,7 +43,7 @@ func Poll(database *sql.DB, cfg config.Config) {
 			Scope:        auth.Scope,
 		}); err != nil {
 			log.Printf("scraper: error updating tokens: %v", err)
-			return
+			return false
 		}
 		auth.AccessToken = token.AccessToken
 	}
@@ -46,7 +51,7 @@ func Poll(database *sql.DB, cfg config.Config) {
 	ps, err := spotify.GetPlaybackState(auth.AccessToken)
 	if err != nil {
 		log.Printf("scraper: error fetching playback state: %v", err)
-		return
+		return false
 	}
 
 	now := time.Now().Format("2006-01-02 15:04:05")
@@ -54,23 +59,23 @@ func Poll(database *sql.DB, cfg config.Config) {
 	// Nothing playing
 	if ps == nil || ps.Item == nil {
 		fmt.Printf("%s  ⏸ Nothing playing\n", now)
-		return
+		return false
 	}
 
 	// Skip non-track types (episodes, ads)
 	if ps.CurrentlyPlayingType != "track" {
-		return
+		return true
 	}
 
 	// Skip local files
 	if ps.Item.IsLocal {
-		return
+		return true
 	}
 
 	// Insert metadata (artist, album, album images, track)
 	if err := db.InsertMetadata(database, *ps.Item); err != nil {
 		log.Printf("scraper: error inserting metadata: %v", err)
-		return
+		return true
 	}
 
 	// Log to database
@@ -92,7 +97,7 @@ func Poll(database *sql.DB, cfg config.Config) {
 		ContextURI:   contextURI,
 	}); err != nil {
 		log.Printf("scraper: error inserting playback log: %v", err)
-		return
+		return true
 	}
 
 	// Stdout logging
@@ -113,4 +118,6 @@ func Poll(database *sql.DB, cfg config.Config) {
 		strings.Join(artists, ", "),
 		ps.Item.Album.Name,
 	)
+
+	return true
 }

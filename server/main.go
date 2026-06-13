@@ -13,7 +13,6 @@ import (
 	"listening-log/server/scraper"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-co-op/gocron/v2"
 )
 
 func main() {
@@ -25,18 +24,21 @@ func main() {
 	}
 	defer database.Close()
 
-	// Start scraper on a 30s schedule
-	s, err := gocron.NewScheduler()
-	if err != nil {
-		log.Fatalf("failed to create scheduler: %v", err)
-	}
-	s.NewJob(
-		gocron.DurationJob(30*time.Second),
-		gocron.NewTask(scraper.Poll, database, cfg),
-	)
-	s.Start()
-	defer s.Shutdown()
-	log.Println("scraper started — polling every 30s")
+	// Start scraper with adaptive polling
+	go func() {
+		timer := time.NewTimer(0) // fire immediately on startup
+		defer timer.Stop()
+		for {
+			<-timer.C
+			active := scraper.Poll(database, cfg)
+			if active {
+				timer.Reset(scraper.PollIntervalActive)
+			} else {
+				timer.Reset(scraper.PollIntervalIdle)
+			}
+		}
+	}()
+	log.Println("scraper started — polling every 15s (active) / 30s (idle)")
 
 	auth := &handlers.AuthHandler{DB: database, Cfg: cfg}
 

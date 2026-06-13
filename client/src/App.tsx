@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { fetchStatus } from "./api/client";
+import { NowPlaying } from "./components/NowPlaying";
 
 const SERVER_URL = import.meta.env.DEV ? "http://127.0.0.1:8080" : "";
 
@@ -21,6 +22,7 @@ export default function App() {
       <div style={{ textAlign: "center", marginTop: "4rem" }}>
         <h1>Listening Log</h1>
         <p>Spotify connected</p>
+        <NowPlaying />
       </div>
     );
   }

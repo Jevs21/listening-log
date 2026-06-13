@@ -39,3 +39,7 @@ On each poll, the scraper inserts track, album, and artist metadata into lookup 
 ## Phase 5: Metadata Upsert
 
 Add `updated_at` column to `artist`, `album`, and `track` tables. Switch from insert-or-ignore to upsert so `updated_at` is refreshed each time the scraper encounters an existing row. No other columns change on conflict.
+
+## Phase 6: Now Playing API
+
+First data-driven frontend feature. A new `GET /api/now-playing` Go endpoint returns the most recently updated track joined with artist and album names. TanStack React Query is added to the client with a 10-second polling interval. A reusable `<NowPlaying />` component displays the result as plain text. Establishes the query hook + API client pattern for all future frontend data queries.

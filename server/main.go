@@ -47,6 +47,7 @@ func main() {
 	r.GET("/api/auth/callback", auth.Callback)
 	r.GET("/api/status", auth.Status)
 	r.GET("/api/health", handlers.Health)
+	r.GET("/api/now-playing", handlers.NowPlaying(database))
 
 	// Serve built client in prod (if client/dist exists)
 	clientDist := filepath.Join("..", "client", "dist")

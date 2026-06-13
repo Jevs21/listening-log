@@ -28,3 +28,45 @@ CREATE TABLE IF NOT EXISTS playback_log (
 
 CREATE INDEX IF NOT EXISTS idx_playback_log_polled_at ON playback_log(polled_at);
 CREATE INDEX IF NOT EXISTS idx_playback_log_track_id ON playback_log(track_id);
+
+CREATE TABLE IF NOT EXISTS artist (
+    spotify_id   TEXT PRIMARY KEY,
+    name         TEXT NOT NULL,
+    created_at   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS album (
+    spotify_id    TEXT PRIMARY KEY,
+    name          TEXT NOT NULL,
+    album_type    TEXT,
+    total_tracks  INTEGER,
+    release_date  TEXT,
+    created_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS album_image (
+    id             INTEGER PRIMARY KEY AUTOINCREMENT,
+    album_id       TEXT NOT NULL REFERENCES album(spotify_id),
+    url            TEXT NOT NULL,
+    width          INTEGER,
+    height         INTEGER
+);
+
+CREATE INDEX IF NOT EXISTS idx_album_image_album_id ON album_image(album_id);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_album_image_unique ON album_image(album_id, url);
+
+CREATE TABLE IF NOT EXISTS track (
+    spotify_id    TEXT PRIMARY KEY,
+    name          TEXT NOT NULL,
+    album_id      TEXT NOT NULL REFERENCES album(spotify_id),
+    artist_id     TEXT NOT NULL REFERENCES artist(spotify_id),
+    duration_ms   INTEGER NOT NULL,
+    track_number  INTEGER,
+    disc_number   INTEGER,
+    explicit      INTEGER,
+    isrc          TEXT,
+    created_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_track_album_id ON track(album_id);
+CREATE INDEX IF NOT EXISTS idx_track_artist_id ON track(artist_id);

@@ -111,20 +111,40 @@ type PlaybackState struct {
 }
 
 type Track struct {
-	ID         string   `json:"id"`
-	Name       string   `json:"name"`
-	Album      Album    `json:"album"`
-	Artists    []Artist `json:"artists"`
-	DurationMs int      `json:"duration_ms"`
-	Popularity int      `json:"popularity"`
-	IsLocal    bool     `json:"is_local"`
+	ID          string      `json:"id"`
+	Name        string      `json:"name"`
+	Album       Album       `json:"album"`
+	Artists     []Artist    `json:"artists"`
+	DurationMs  int         `json:"duration_ms"`
+	Popularity  int         `json:"popularity"`
+	IsLocal     bool        `json:"is_local"`
+	TrackNumber int         `json:"track_number"`
+	DiscNumber  int         `json:"disc_number"`
+	Explicit    bool        `json:"explicit"`
+	ExternalIDs ExternalIDs `json:"external_ids"`
+}
+
+type ExternalIDs struct {
+	ISRC string `json:"isrc"`
 }
 
 type Album struct {
-	Name string `json:"name"`
+	ID          string  `json:"id"`
+	Name        string  `json:"name"`
+	AlbumType   string  `json:"album_type"`
+	TotalTracks int     `json:"total_tracks"`
+	ReleaseDate string  `json:"release_date"`
+	Images      []Image `json:"images"`
+}
+
+type Image struct {
+	URL    string `json:"url"`
+	Width  int    `json:"width"`
+	Height int    `json:"height"`
 }
 
 type Artist struct {
+	ID   string `json:"id"`
 	Name string `json:"name"`
 }
 

@@ -67,6 +67,12 @@ func Poll(database *sql.DB, cfg config.Config) {
 		return
 	}
 
+	// Insert metadata (artist, album, album images, track)
+	if err := db.InsertMetadata(database, *ps.Item); err != nil {
+		log.Printf("scraper: error inserting metadata: %v", err)
+		return
+	}
+
 	// Log to database
 	var contextURI *string
 	if ps.Context != nil {

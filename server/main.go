@@ -5,12 +5,15 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 
 	"listening-log/server/config"
 	"listening-log/server/db"
 	"listening-log/server/handlers"
+	"listening-log/server/scraper"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-co-op/gocron/v2"
 )
 
 func main() {
@@ -21,6 +24,19 @@ func main() {
 		log.Fatalf("failed to open database: %v", err)
 	}
 	defer database.Close()
+
+	// Start scraper on a 30s schedule
+	s, err := gocron.NewScheduler()
+	if err != nil {
+		log.Fatalf("failed to create scheduler: %v", err)
+	}
+	s.NewJob(
+		gocron.DurationJob(30*time.Second),
+		gocron.NewTask(scraper.Poll, database, cfg),
+	)
+	s.Start()
+	defer s.Shutdown()
+	log.Println("scraper started — polling every 30s")
 
 	auth := &handlers.AuthHandler{DB: database, Cfg: cfg}
 

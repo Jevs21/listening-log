@@ -9,6 +9,17 @@ type SpotifyAuth struct {
 	Expiry       int64
 }
 
+func ReadAuth(db *sql.DB) (*SpotifyAuth, error) {
+	var auth SpotifyAuth
+	err := db.QueryRow(
+		"SELECT access_token, refresh_token, scope, expiry FROM spotify_auth WHERE id = 1",
+	).Scan(&auth.AccessToken, &auth.RefreshToken, &auth.Scope, &auth.Expiry)
+	if err != nil {
+		return nil, err
+	}
+	return &auth, nil
+}
+
 func IsConnected(db *sql.DB) (bool, error) {
 	var refreshToken string
 	err := db.QueryRow("SELECT refresh_token FROM spotify_auth WHERE id = 1").Scan(&refreshToken)

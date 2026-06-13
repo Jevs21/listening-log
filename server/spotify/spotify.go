@@ -99,15 +99,25 @@ func RefreshToken(clientID, clientSecret, refreshToken string) (*TokenResponse, 
 	return &token, nil
 }
 
-type CurrentlyPlaying struct {
-	IsPlaying bool   `json:"is_playing"`
-	Item      *Track `json:"item"`
+type PlaybackState struct {
+	IsPlaying            bool     `json:"is_playing"`
+	CurrentlyPlayingType string   `json:"currently_playing_type"`
+	Item                 *Track   `json:"item"`
+	ProgressMs           int      `json:"progress_ms"`
+	Device               Device   `json:"device"`
+	ShuffleState         bool     `json:"shuffle_state"`
+	RepeatState          string   `json:"repeat_state"`
+	Context              *Context `json:"context"`
 }
 
 type Track struct {
-	Name    string   `json:"name"`
-	Album   Album    `json:"album"`
-	Artists []Artist `json:"artists"`
+	ID         string   `json:"id"`
+	Name       string   `json:"name"`
+	Album      Album    `json:"album"`
+	Artists    []Artist `json:"artists"`
+	DurationMs int      `json:"duration_ms"`
+	Popularity int      `json:"popularity"`
+	IsLocal    bool     `json:"is_local"`
 }
 
 type Album struct {
@@ -118,8 +128,17 @@ type Artist struct {
 	Name string `json:"name"`
 }
 
-func GetCurrentlyPlaying(accessToken string) (*CurrentlyPlaying, error) {
-	req, err := http.NewRequest("GET", "https://api.spotify.com/v1/me/player/currently-playing", nil)
+type Device struct {
+	Name string `json:"name"`
+	Type string `json:"type"`
+}
+
+type Context struct {
+	URI string `json:"uri"`
+}
+
+func GetPlaybackState(accessToken string) (*PlaybackState, error) {
+	req, err := http.NewRequest("GET", "https://api.spotify.com/v1/me/player", nil)
 	if err != nil {
 		return nil, err
 	}
@@ -136,14 +155,14 @@ func GetCurrentlyPlaying(accessToken string) (*CurrentlyPlaying, error) {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("currently-playing request failed: %s", resp.Status)
+		return nil, fmt.Errorf("playback state request failed: %s", resp.Status)
 	}
 
-	var cp CurrentlyPlaying
-	if err := json.NewDecoder(resp.Body).Decode(&cp); err != nil {
+	var ps PlaybackState
+	if err := json.NewDecoder(resp.Body).Decode(&ps); err != nil {
 		return nil, err
 	}
-	return &cp, nil
+	return &ps, nil
 }
 
 func ExpiryFromNow(expiresIn int64) int64 {

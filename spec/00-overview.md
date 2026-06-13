@@ -28,4 +28,10 @@ Technologies:
 - Database - File based SQLite
 - Server - Go
 
-WIP
+## Phase 3: Core Polling Table
+
+The scraper writes each poll result to a `playback_log` table — one row per poll, storing only data that can't be retrieved later by ID. This is the permanent source of truth for all future analysis. Track/album/artist metadata will live in separate lookup tables built in a later phase.
+
+## Phase 4: Metadata Lookup Tables
+
+On each poll, the scraper inserts track, album, and artist metadata into lookup tables (insert-or-ignore by Spotify ID). All data comes from the existing now-playing response — no extra API calls. Adds `artist`, `album`, `album_image`, and `track` tables.

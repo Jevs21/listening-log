@@ -43,28 +43,68 @@ func Poll(database *sql.DB, cfg config.Config) {
 		auth.AccessToken = token.AccessToken
 	}
 
-	cp, err := spotify.GetCurrentlyPlaying(auth.AccessToken)
+	ps, err := spotify.GetPlaybackState(auth.AccessToken)
 	if err != nil {
-		log.Printf("scraper: error fetching currently playing: %v", err)
+		log.Printf("scraper: error fetching playback state: %v", err)
 		return
 	}
 
 	now := time.Now().Format("2006-01-02 15:04:05")
 
-	if cp == nil || cp.Item == nil || !cp.IsPlaying {
+	// Nothing playing
+	if ps == nil || ps.Item == nil {
 		fmt.Printf("%s  ⏸ Nothing playing\n", now)
 		return
 	}
 
-	artists := make([]string, len(cp.Item.Artists))
-	for i, a := range cp.Item.Artists {
+	// Skip non-track types (episodes, ads)
+	if ps.CurrentlyPlayingType != "track" {
+		return
+	}
+
+	// Skip local files
+	if ps.Item.IsLocal {
+		return
+	}
+
+	// Log to database
+	var contextURI *string
+	if ps.Context != nil {
+		contextURI = &ps.Context.URI
+	}
+
+	if err := db.InsertPlaybackLog(database, db.PlaybackLog{
+		TrackID:      ps.Item.ID,
+		ProgressMs:   ps.ProgressMs,
+		DurationMs:   ps.Item.DurationMs,
+		IsPlaying:    ps.IsPlaying,
+		Popularity:   ps.Item.Popularity,
+		DeviceName:   ps.Device.Name,
+		DeviceType:   ps.Device.Type,
+		ShuffleState: ps.ShuffleState,
+		RepeatState:  ps.RepeatState,
+		ContextURI:   contextURI,
+	}); err != nil {
+		log.Printf("scraper: error inserting playback log: %v", err)
+		return
+	}
+
+	// Stdout logging
+	artists := make([]string, len(ps.Item.Artists))
+	for i, a := range ps.Item.Artists {
 		artists[i] = a.Name
 	}
 
-	fmt.Printf("%s  ♫ \"%s\" — %s (%s)\n",
+	status := "♫"
+	if !ps.IsPlaying {
+		status = "⏸"
+	}
+
+	fmt.Printf("%s  %s \"%s\" — %s (%s)\n",
 		now,
-		cp.Item.Name,
+		status,
+		ps.Item.Name,
 		strings.Join(artists, ", "),
-		cp.Item.Album.Name,
+		ps.Item.Album.Name,
 	)
 }

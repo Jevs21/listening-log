@@ -9,19 +9,21 @@ import (
 func InsertMetadata(db *sql.DB, track spotify.Track) error {
 	primaryArtist := track.Artists[0]
 
-	// 1. Insert artist (ignore if exists)
+	// 1. Upsert artist (refresh updated_at on conflict)
 	if _, err := db.Exec(`
-		INSERT OR IGNORE INTO artist (spotify_id, name)
-		VALUES (?, ?)`,
+		INSERT INTO artist (spotify_id, name)
+		VALUES (?, ?)
+		ON CONFLICT(spotify_id) DO UPDATE SET updated_at = CURRENT_TIMESTAMP`,
 		primaryArtist.ID, primaryArtist.Name,
 	); err != nil {
 		return err
 	}
 
-	// 2. Insert album (ignore if exists)
+	// 2. Upsert album (refresh updated_at on conflict)
 	if _, err := db.Exec(`
-		INSERT OR IGNORE INTO album (spotify_id, name, album_type, total_tracks, release_date)
-		VALUES (?, ?, ?, ?, ?)`,
+		INSERT INTO album (spotify_id, name, album_type, total_tracks, release_date)
+		VALUES (?, ?, ?, ?, ?)
+		ON CONFLICT(spotify_id) DO UPDATE SET updated_at = CURRENT_TIMESTAMP`,
 		track.Album.ID, track.Album.Name, track.Album.AlbumType,
 		track.Album.TotalTracks, track.Album.ReleaseDate,
 	); err != nil {
@@ -39,14 +41,15 @@ func InsertMetadata(db *sql.DB, track spotify.Track) error {
 		}
 	}
 
-	// 4. Insert track (ignore if exists)
+	// 4. Upsert track (refresh updated_at on conflict)
 	explicit := 0
 	if track.Explicit {
 		explicit = 1
 	}
 	if _, err := db.Exec(`
-		INSERT OR IGNORE INTO track (spotify_id, name, album_id, artist_id, duration_ms, track_number, disc_number, explicit, isrc)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		INSERT INTO track (spotify_id, name, album_id, artist_id, duration_ms, track_number, disc_number, explicit, isrc)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+		ON CONFLICT(spotify_id) DO UPDATE SET updated_at = CURRENT_TIMESTAMP`,
 		track.ID, track.Name, track.Album.ID, primaryArtist.ID,
 		track.DurationMs, track.TrackNumber, track.DiscNumber,
 		explicit, track.ExternalIDs.ISRC,

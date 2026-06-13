@@ -35,3 +35,7 @@ The scraper writes each poll result to a `playback_log` table — one row per po
 ## Phase 4: Metadata Lookup Tables
 
 On each poll, the scraper inserts track, album, and artist metadata into lookup tables (insert-or-ignore by Spotify ID). All data comes from the existing now-playing response — no extra API calls. Adds `artist`, `album`, `album_image`, and `track` tables.
+
+## Phase 5: Metadata Upsert
+
+Add `updated_at` column to `artist`, `album`, and `track` tables. Switch from insert-or-ignore to upsert so `updated_at` is refreshed each time the scraper encounters an existing row. No other columns change on conflict.

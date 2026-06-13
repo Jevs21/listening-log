@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { fetchStatus } from "./api/client";
 import { NowPlaying } from "./components/NowPlaying";
+import { ImageGrid } from "./components/ImageGrid";
 
 const SERVER_URL = import.meta.env.DEV ? "http://127.0.0.1:8080" : "";
 
@@ -23,6 +24,7 @@ export default function App() {
         <h1>Listening Log</h1>
         <p>Spotify connected</p>
         <NowPlaying />
+        <ImageGrid />
       </div>
     );
   }

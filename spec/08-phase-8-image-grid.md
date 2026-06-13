@@ -30,7 +30,7 @@ Returns up to 50 album art URLs (64×64 size preferred).
 
 | Mode | Query |
 |------|-------|
-| `tracks` | Select distinct `album_image.url` joined through `track → album → album_image` ordered by `track.updated_at DESC`, deduplicated by `track.spotify_id`, filtered to `width = 64` or smallest available, limit 50 |
+| `tracks` | Select `album_image.url` joined through `track → album → album_image` ordered by `track.updated_at DESC`, filtered to `width = 64` or smallest available, limit 50. Duplicates are allowed — multiple tracks from the same album produce repeated images. |
 | `albums` | Select `album_image.url` joined through `album → album_image` ordered by `album.updated_at DESC`, deduplicated by `album.spotify_id`, filtered to `width = 64` or smallest available, limit 50 |
 
 **Response:**
@@ -120,7 +120,7 @@ r.GET("/api/image-grid", handlers.ImageGrid(database))
 
 - [ ] `GET /api/image-grid?mode=tracks` returns up to 50 album image URLs ordered by `track.updated_at DESC`
 - [ ] `GET /api/image-grid?mode=albums` returns up to 50 album image URLs ordered by `album.updated_at DESC`
-- [ ] Results are deduplicated (no repeated album art in a single response)
+- [ ] `tracks` mode allows duplicate album art (one image per track row); `albums` mode has no duplicates
 - [ ] 64px images preferred, smallest available used as fallback
 - [ ] `ImageGrid` component renders below `NowPlaying` with a 4-column grid of 64×64 thumbnails
 - [ ] Dropdown switches between "Recent Tracks" and "Recent Albums" modes

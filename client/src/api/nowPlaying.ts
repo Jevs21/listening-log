@@ -6,6 +6,7 @@ export interface NowPlayingTrack {
   duration_ms: number;
   is_explicit: boolean;
   updated_at: string;
+  album_image_url: string | null;
 }
 
 export interface NowPlayingResponse {

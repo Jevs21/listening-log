@@ -1,0 +1,86 @@
+.now-playing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.record-container {
+  --record-size: 300px;
+  --label-size: 150px;
+  --spin-duration: 1.8s;
+  width: var(--record-size);
+  height: var(--record-size);
+}
+
+.record {
+  width: var(--record-size);
+  height: var(--record-size);
+  border-radius: 50%;
+  background: #111;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.record.spinning {
+  animation: spin var(--spin-duration) linear infinite;
+}
+
+.grooves {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: repeating-radial-gradient(
+    circle at center,
+    transparent 0px,
+    transparent 4px,
+    rgba(255, 255, 255, 0.03) 5px,
+    transparent 6px
+  );
+}
+
+.label {
+  width: var(--label-size);
+  height: var(--label-size);
+  border-radius: 50%;
+  overflow: hidden;
+  background: #333;
+  position: relative;
+  z-index: 1;
+}
+
+.label img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.track-info {
+  text-align: center;
+}
+
+.track-info .track-name {
+  font-weight: bold;
+  margin: 0;
+}
+
+.track-info .track-artist {
+  margin: 0.25rem 0 0;
+}
+
+.track-info .track-status {
+  margin: 0.25rem 0 0;
+  opacity: 0.7;
+  font-size: 0.9em;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -26,9 +26,9 @@ export function ImageGrid() {
           marginTop: "1rem",
         }}
       >
-        {images.map((img) => (
+        {images.map((img, i) => (
           <img
-            key={img.url}
+            key={`${img.url}-${i}`}
             src={img.url}
             alt={img.album_name}
             width={64}

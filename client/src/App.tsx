@@ -22,6 +22,7 @@ export default function App() {
     return (
       <div style={{ maxWidth: "300px", margin: "4rem auto 0" }}>
         <h1>Listening Log</h1>
+        <p>i built this so id never forget a song i listen to. id love if you left me a song suggestion.</p>
         <p>Spotify connected</p>
         <NowPlaying />
         <ImageGrid />
@@ -32,6 +33,7 @@ export default function App() {
   return (
     <div style={{ textAlign: "center", marginTop: "4rem" }}>
       <h1>Listening Log</h1>
+      <p>im jeb. i built this so id never forget a song i listen to. id love if you left me a song suggestion.</p>
       <a href={`${SERVER_URL}/api/auth/login`}>
         <button style={{ padding: "0.75rem 1.5rem", fontSize: "1rem", cursor: "pointer" }}>
           Connect Spotify

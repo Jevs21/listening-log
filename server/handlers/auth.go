@@ -52,6 +52,20 @@ func (h *AuthHandler) Callback(c *gin.Context) {
 		return
 	}
 
+	profile, err := spotify.GetCurrentUser(token.AccessToken)
+	if err != nil {
+		log.Printf("get current user error: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get user profile"})
+		return
+	}
+	log.Printf("spotify auth callback: user_id=%s", profile.ID)
+
+	if h.Cfg.SpotifyAllowedUserID != "" && profile.ID != h.Cfg.SpotifyAllowedUserID {
+		log.Printf("spotify auth rejected: user_id=%s not allowed", profile.ID)
+		c.Redirect(http.StatusFound, h.Cfg.ClientBaseURL)
+		return
+	}
+
 	err = db.UpsertAuth(h.DB, db.SpotifyAuth{
 		AccessToken:  token.AccessToken,
 		RefreshToken: token.RefreshToken,

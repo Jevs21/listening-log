@@ -12,7 +12,8 @@ type Config struct {
 	SpotifyRedirectURI string
 	ClientBaseURL      string
 	Port               string
-	DatabasePath       string
+	DatabasePath         string
+	SpotifyAllowedUserID string
 }
 
 func Load() Config {
@@ -25,7 +26,8 @@ func Load() Config {
 		SpotifyRedirectURI: os.Getenv("SPOTIFY_REDIRECT_URI"),
 		ClientBaseURL:      os.Getenv("CLIENT_BASE_URL"),
 		Port:               os.Getenv("PORT"),
-		DatabasePath:       os.Getenv("DATABASE_PATH"),
+		DatabasePath:         os.Getenv("DATABASE_PATH"),
+		SpotifyAllowedUserID: os.Getenv("SPOTIFY_ALLOWED_USER_ID"),
 	}
 
 	if c.Port == "" {

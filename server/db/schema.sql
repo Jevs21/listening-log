@@ -73,3 +73,13 @@ CREATE TABLE IF NOT EXISTS track (
 
 CREATE INDEX IF NOT EXISTS idx_track_album_id ON track(album_id);
 CREATE INDEX IF NOT EXISTS idx_track_artist_id ON track(artist_id);
+
+CREATE TABLE IF NOT EXISTS song_suggestion (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    link       TEXT    NOT NULL DEFAULT '',
+    message    TEXT    NOT NULL DEFAULT '',
+    ip_address TEXT    NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_song_suggestion_ip_created ON song_suggestion(ip_address, created_at);

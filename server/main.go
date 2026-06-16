@@ -51,6 +51,7 @@ func main() {
 	r.GET("/api/health", handlers.Health)
 	r.GET("/api/now-playing", handlers.NowPlaying(database))
 	r.GET("/api/image-grid", handlers.ImageGrid(database))
+	r.POST("/api/suggestions", handlers.SubmitSuggestion(database))
 
 	// Serve built client in prod (if client/dist exists)
 	clientDist := filepath.Join("..", "client", "dist")

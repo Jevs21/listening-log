@@ -20,7 +20,7 @@ export default function App() {
 
   if (connected) {
     return (
-      <div style={{ textAlign: "center", marginTop: "4rem" }}>
+      <div style={{ maxWidth: "300px", margin: "4rem auto 0" }}>
         <h1>Listening Log</h1>
         <p>Spotify connected</p>
         <NowPlaying />

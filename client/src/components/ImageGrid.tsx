@@ -22,7 +22,7 @@ export function ImageGrid() {
           display: "grid",
           gridTemplateColumns: "repeat(4, 64px)",
           gap: "4px",
-          justifyContent: "center",
+          justifyContent: "start",
           marginTop: "1rem",
         }}
       >

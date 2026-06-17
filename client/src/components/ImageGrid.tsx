@@ -20,9 +20,8 @@ export function ImageGrid() {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(4, 64px)",
+          gridTemplateColumns: "repeat(4, 1fr)",
           gap: "4px",
-          justifyContent: "start",
           marginTop: "1rem",
         }}
       >
@@ -31,8 +30,12 @@ export function ImageGrid() {
             key={`${img.url}-${i}`}
             src={img.url}
             alt={img.album_name}
-            width={64}
-            height={64}
+            style={{
+              width: "100%",
+              aspectRatio: "1",
+              objectFit: "cover",
+              borderRadius: "4px",
+            }}
           />
         ))}
       </div>

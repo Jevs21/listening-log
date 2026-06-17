@@ -20,10 +20,10 @@ func HasSuggested(database *sql.DB, ip string) (bool, error) {
 	return count > 0, err
 }
 
-func InsertSuggestion(database *sql.DB, link, message, ip string) error {
+func InsertSuggestion(database *sql.DB, link, message, source, ip string) error {
 	_, err := database.Exec(
-		`INSERT INTO song_suggestion (link, message, ip_address) VALUES (?, ?, ?)`,
-		link, message, ip,
+		`INSERT INTO song_suggestion (link, message, source, ip_address) VALUES (?, ?, ?, ?)`,
+		link, message, source, ip,
 	)
 	return err
 }

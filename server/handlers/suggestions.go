@@ -14,6 +14,7 @@ import (
 type suggestionRequest struct {
 	Link    string `json:"link"`
 	Message string `json:"message"`
+	Source  string `json:"source"`
 }
 
 func CheckSuggestion(database *sql.DB) gin.HandlerFunc {
@@ -66,7 +67,15 @@ func SubmitSuggestion(database *sql.DB) gin.HandlerFunc {
 			return
 		}
 
-		if err := db.InsertSuggestion(database, req.Link, req.Message, ip); err != nil {
+		if req.Source == "" {
+			req.Source = "home"
+		}
+		if req.Source != "home" && req.Source != "gate" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid source"})
+			return
+		}
+
+		if err := db.InsertSuggestion(database, req.Link, req.Message, req.Source, ip); err != nil {
 			log.Printf("suggestion insert error: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "something went wrong"})
 			return

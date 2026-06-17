@@ -22,7 +22,7 @@ export function SuggestionModal({ open, onClose }: Props) {
         <button onClick={onClose} className="modal-close" aria-label="Close">
           ✕
         </button>
-        <SuggestionForm onSuccess={onClose} />
+        <SuggestionForm source="home" onSuccess={onClose} />
       </div>
     </div>
   );

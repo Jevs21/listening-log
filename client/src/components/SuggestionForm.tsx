@@ -3,10 +3,11 @@ import { submitSuggestion } from "../api/suggestions";
 import "./SuggestionForm.css";
 
 interface Props {
+  source: "home" | "gate";
   onSuccess?: () => void;
 }
 
-export function SuggestionForm({ onSuccess }: Props) {
+export function SuggestionForm({ source, onSuccess }: Props) {
   const [link, setLink] = useState("");
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -29,7 +30,7 @@ export function SuggestionForm({ onSuccess }: Props) {
     setSubmitting(true);
 
     try {
-      const res = await submitSuggestion(link.trim(), message.trim());
+      const res = await submitSuggestion(link.trim(), message.trim(), source);
       if (res.ok) {
         setSuccess(true);
         if (onSuccess) {

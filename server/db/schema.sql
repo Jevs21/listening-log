@@ -78,6 +78,7 @@ CREATE TABLE IF NOT EXISTS song_suggestion (
     id         INTEGER PRIMARY KEY AUTOINCREMENT,
     link       TEXT    NOT NULL DEFAULT '',
     message    TEXT    NOT NULL DEFAULT '',
+    source     TEXT    NOT NULL DEFAULT 'home',
     ip_address TEXT    NOT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

@@ -12,7 +12,7 @@ export function GatePage() {
         i wasn't gonna check but this is really a ploy to get song suggestions.
         jokes on you.
       </p>
-      <SuggestionForm onSuccess={() => navigate("/stats")} />
+      <SuggestionForm source="gate" onSuccess={() => navigate("/stats")} />
     </div>
   );
 }

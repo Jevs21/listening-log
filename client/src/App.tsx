@@ -20,14 +20,11 @@ export default function App() {
   }
 
   return (
-    <div style={{ maxWidth: "300px", margin: "4rem auto 0" }}>
-      <h1>Listening Log</h1>
-      <p>
-        i built this so id never forget a song i listen to. id love if you left me a song{" "}
-        <span
-          onClick={() => setModalOpen(true)}
-          style={{ textDecoration: "underline", cursor: "pointer" }}
-        >
+    <div className="app-container">
+      <h1 className="app-title">listening log</h1>
+      <p className="app-description">
+        spotify could but they wont so i did. <br/> pls leave me a song{" "}
+        <span className="suggestion-link" onClick={() => setModalOpen(true)}>
           suggestion
         </span>
         .

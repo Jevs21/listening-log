@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { submitSuggestion } from "../api/suggestions";
+import "./SuggestionModal.css";
 
 interface Props {
   open: boolean;
@@ -59,42 +60,11 @@ export function SuggestionModal({ open, onClose }: Props) {
   return (
     <div
       ref={overlayRef}
+      className="modal-overlay"
       onClick={(e) => e.target === overlayRef.current && onClose()}
-      style={{
-        position: "fixed",
-        inset: 0,
-        backgroundColor: "rgba(0,0,0,0.7)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 1000,
-      }}
     >
-      <div
-        style={{
-          background: "#1a1a1a",
-          border: "1px solid #333",
-          borderRadius: 8,
-          padding: "1.5rem",
-          width: "min(90vw, 340px)",
-          position: "relative",
-          color: "#e0e0e0",
-        }}
-      >
-        <button
-          onClick={onClose}
-          style={{
-            position: "absolute",
-            top: 8,
-            right: 12,
-            background: "none",
-            border: "none",
-            color: "#888",
-            fontSize: "1.2rem",
-            cursor: "pointer",
-          }}
-          aria-label="Close"
-        >
+      <div className="modal-panel">
+        <button onClick={onClose} className="modal-close" aria-label="Close">
           ✕
         </button>
 
@@ -106,69 +76,38 @@ export function SuggestionModal({ open, onClose }: Props) {
           <form onSubmit={handleSubmit}>
             <input
               type="text"
+              className="modal-input"
               value={link}
               onChange={(e) => setLink(e.target.value)}
               placeholder="spotify, apple music, or youtube link"
               maxLength={2048}
-              style={{
-                width: "100%",
-                padding: "0.5rem",
-                marginBottom: "0.75rem",
-                background: "#111",
-                border: "1px solid #333",
-                borderRadius: 4,
-                color: "#e0e0e0",
-                fontSize: "0.9rem",
-                boxSizing: "border-box",
-              }}
+              style={{ marginBottom: "0.75rem" }}
             />
             <textarea
+              className="modal-input"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder="or leave a message"
               maxLength={200}
               rows={3}
-              style={{
-                width: "100%",
-                padding: "0.5rem",
-                background: "#111",
-                border: "1px solid #333",
-                borderRadius: 4,
-                color: "#e0e0e0",
-                fontSize: "0.9rem",
-                resize: "none",
-                boxSizing: "border-box",
-              }}
+              style={{ resize: "none" }}
             />
             <div
               style={{
                 textAlign: "right",
                 fontSize: "0.75rem",
-                color: "#666",
+                color: "var(--text-muted)",
                 marginBottom: "0.75rem",
               }}
             >
               {message.length}/200
             </div>
             {error && (
-              <p style={{ color: "#ef4444", fontSize: "0.85rem", marginBottom: "0.5rem" }}>
+              <p style={{ color: "var(--error)", fontSize: "0.85rem", marginBottom: "0.5rem" }}>
                 {error}
               </p>
             )}
-            <button
-              type="submit"
-              disabled={!canSubmit}
-              style={{
-                width: "100%",
-                padding: "0.5rem",
-                background: canSubmit ? "#e0e0e0" : "#444",
-                color: canSubmit ? "#111" : "#888",
-                border: "none",
-                borderRadius: 4,
-                fontSize: "0.9rem",
-                cursor: canSubmit ? "pointer" : "default",
-              }}
-            >
+            <button type="submit" disabled={!canSubmit} className="modal-submit">
               {submitting ? "submitting..." : "submit"}
             </button>
           </form>

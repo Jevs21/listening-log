@@ -17,7 +17,7 @@
   width: var(--record-size);
   height: var(--record-size);
   border-radius: 50%;
-  background: #111;
+  background: var(--surface);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -46,7 +46,7 @@
   height: var(--label-size);
   border-radius: 50%;
   overflow: hidden;
-  background: #333;
+  background: var(--border);
   position: relative;
   z-index: 1;
 }
@@ -62,19 +62,27 @@
   width: 100%;
 }
 
-.track-info .track-name {
-  font-weight: bold;
+.track-info .track-status {
   margin: 0;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.track-info .track-name {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1.2rem;
+  letter-spacing: -0.01em;
+  margin: 0.25rem 0 0;
+  line-height: 1.2;
 }
 
 .track-info .track-artist {
-  margin: 0.25rem 0 0;
-}
-
-.track-info .track-status {
-  margin: 0.25rem 0 0;
-  opacity: 0.7;
-  font-size: 0.9em;
+  margin: -0.1rem 0 2rem;
+  color: var(--text-secondary);
+  font-size: 1rem;
 }
 
 @keyframes spin {

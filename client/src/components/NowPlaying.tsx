@@ -35,14 +35,14 @@ export function NowPlaying() {
         </div>
       </div>
       <div className="track-info">
-        <p className="track-name">{name}</p>
-        <p className="track-artist">
-          by {artist_name} &mdash; {album_name}
-        </p>
         <p className="track-status">
           {isStale
             ? `Last played (${timeAgo(new Date(updated_at))})`
             : "Now playing"}
+        </p>
+        <p className="track-name">{name}</p>
+        <p className="track-artist">
+          {artist_name} - {album_name}
         </p>
       </div>
     </div>

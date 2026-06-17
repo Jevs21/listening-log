@@ -11,10 +11,10 @@ export function StatusDot({ connected }: { connected: boolean }) {
   return (
     <div style={{ textAlign: "center", marginTop: "2rem" }}>
       {connected ? (
-        <span style={{ ...dotStyle, backgroundColor: "#22c55e" }} />
+        <span style={{ ...dotStyle, backgroundColor: "var(--success)" }} />
       ) : (
         <a href={`${SERVER_URL}/api/auth/login`}>
-          <span style={{ ...dotStyle, backgroundColor: "#ef4444", cursor: "pointer" }} />
+          <span style={{ ...dotStyle, backgroundColor: "var(--error)", cursor: "pointer" }} />
         </a>
       )}
     </div>

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useImageGrid } from "../hooks/useImageGrid";
+import { Tooltip } from "./Tooltip";
 
 type Mode = "tracks" | "albums";
 
@@ -26,17 +27,23 @@ export function ImageGrid() {
         }}
       >
         {images.map((img, i) => (
-          <img
+          <Tooltip
             key={`${img.url}-${i}`}
-            src={img.url}
-            alt={img.album_name}
-            style={{
-              width: "100%",
-              aspectRatio: "1",
-              objectFit: "cover",
-              borderRadius: "4px",
-            }}
-          />
+            title={img.track_name || img.album_name}
+            subtitle={img.artist_name}
+            updatedAt={img.updated_at}
+          >
+            <img
+              src={img.url}
+              alt={img.album_name}
+              style={{
+                width: "100%",
+                aspectRatio: "1",
+                objectFit: "cover",
+                borderRadius: "4px",
+              }}
+            />
+          </Tooltip>
         ))}
       </div>
     </div>

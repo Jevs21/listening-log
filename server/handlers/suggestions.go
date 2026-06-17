@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"log"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"listening-log/server/db"
@@ -41,8 +42,13 @@ func SubmitSuggestion(database *sql.DB) gin.HandlerFunc {
 		req.Link = strings.TrimSpace(req.Link)
 		req.Message = strings.TrimSpace(req.Message)
 
-		if req.Link == "" && req.Message == "" {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "link or message is required"})
+		if req.Link == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "link is required"})
+			return
+		}
+		parsed, err := url.ParseRequestURI(req.Link)
+		if err != nil || (parsed.Scheme != "http" && parsed.Scheme != "https") || parsed.Host == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "link must be a valid url"})
 			return
 		}
 		if len(req.Link) > 2048 {

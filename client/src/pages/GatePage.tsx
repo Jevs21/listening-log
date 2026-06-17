@@ -6,12 +6,10 @@ export function GatePage() {
 
   return (
     <div className="app-container">
-      <h1 className="app-title">listening-log</h1>
-      <p className="app-description">
-        woah hold on a second. gonna need that song suggestion first. you thought
-        i wasn't gonna check but this is really a ploy to get song suggestions.
-        jokes on you.
-      </p>
+      <div style={{ textAlign: "center" }}>
+        <div style={{ fontSize: "6rem", marginBottom: "1rem" }}>🤨</div>
+        <p className="app-description">oh you thought i wasn't gonna check?</p>
+      </div>
       <SuggestionForm source="gate" onSuccess={() => navigate("/stats")} />
     </div>
   );

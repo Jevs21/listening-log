@@ -22,10 +22,23 @@ export function SuggestionForm({ source, onSuccess }: Props) {
     );
   }
 
-  const canSubmit = (link.trim() !== "" || message.trim() !== "") && !submitting;
+  function isValidUrl(str: string): boolean {
+    try {
+      const url = new URL(str);
+      return url.protocol === "http:" || url.protocol === "https:";
+    } catch {
+      return false;
+    }
+  }
+
+  const canSubmit = link.trim() !== "" && isValidUrl(link.trim()) && !submitting;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!isValidUrl(link.trim())) {
+      setError("please enter a valid url");
+      return;
+    }
     setError("");
     setSubmitting(true);
 
@@ -63,7 +76,7 @@ export function SuggestionForm({ source, onSuccess }: Props) {
         className="suggestion-input"
         value={message}
         onChange={(e) => setMessage(e.target.value)}
-        placeholder="or leave a message"
+        placeholder="leave a message (optional)"
         maxLength={200}
         rows={3}
         style={{ resize: "none" }}

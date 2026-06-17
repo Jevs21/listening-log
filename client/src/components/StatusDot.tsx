@@ -9,7 +9,7 @@ const dotStyle = {
 
 export function StatusDot({ connected }: { connected: boolean }) {
   return (
-    <div style={{ textAlign: "center", marginTop: "2rem" }}>
+    <div style={{ textAlign: "center", marginTop: "2rem", marginBottom: "2rem" }}>
       {connected ? (
         <span style={{ ...dotStyle, backgroundColor: "var(--success)" }} />
       ) : (

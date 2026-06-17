@@ -5,3 +5,8 @@ export async function submitSuggestion(link: string, message: string): Promise<R
     body: JSON.stringify({ link, message }),
   });
 }
+
+export async function checkSuggestion(): Promise<{ has_suggested: boolean }> {
+  const res = await fetch("/api/suggestions/check");
+  return res.json();
+}

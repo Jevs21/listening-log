@@ -16,6 +16,19 @@ type suggestionRequest struct {
 	Message string `json:"message"`
 }
 
+func CheckSuggestion(database *sql.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ip := c.ClientIP()
+		has, err := db.HasSuggested(database, ip)
+		if err != nil {
+			log.Printf("suggestion check error: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "something went wrong"})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"has_suggested": has})
+	}
+}
+
 func SubmitSuggestion(database *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req suggestionRequest

@@ -14,6 +14,7 @@ export function ImageGrid() {
       <select
         value={mode}
         onChange={(e) => setMode(e.target.value as Mode)}
+        style={{ width: "100%" }}
       >
         <option value="tracks">Recent Tracks</option>
         <option value="albums">Recent Albums</option>

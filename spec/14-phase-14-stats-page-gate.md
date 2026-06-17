@@ -4,17 +4,17 @@ Builds on Phase 12 (song suggestions).
 
 ## Goal
 
-Add a `/stats` route with a gate: visitors who haven't submitted a song suggestion (by IP) see a playful denial message with a link to the suggestion modal. Once they submit, they're redirected to the real stats page. The stats page itself is a placeholder for now.
+Add a `/stats` route gated by IP-based suggestion check. Visitors without a suggestion are redirected to `/woah-hold-it-right-there-buckaroo` where they see a playful denial message and can submit a suggestion inline (no modal). After submitting, they're redirected to `/stats`. The stats page itself is a placeholder for now.
 
 ## Scope
 
 ### In scope
-- Client-side routing via React Router
+- Client-side routing via React Router (`/`, `/stats`, `/woah-hold-it-right-there-buckaroo`)
 - "stats" link in intro text (same style as "suggestion")
 - `GET /api/suggestions/check` endpoint — returns whether requesting IP has any submissions
-- Gate component that checks suggestion status and renders accordingly
-- Gated message with inline "suggestion" link that opens the modal
-- Auto-redirect to stats content after successful suggestion submit from the gate
+- Refactor suggestion form out of modal into reusable `SuggestionForm` component
+- Gate page with inline suggestion form (not a modal)
+- Auto-redirect to `/stats` after successful suggestion submit from gate page
 - Placeholder stats page content
 
 ### Out of scope
@@ -34,48 +34,51 @@ Returns whether the requesting IP has submitted at least one suggestion.
 
 Uses `c.ClientIP()` like the existing POST endpoint.
 
-**Query:** `SELECT COUNT(*) FROM song_suggestion WHERE ip_address = ? LIMIT 1`
+**Query:** `SELECT COUNT(*) FROM song_suggestion WHERE ip_address = ?`
 
 **Files:**
-- Add handler in `server/handlers/suggestions.go`
-- Add `HasSuggested(db, ip) (bool, error)` in `server/db/suggestions.go`
-- Register route in `server/main.go`
+- `CheckSuggestion` handler in `server/handlers/suggestions.go`
+- `HasSuggested(db, ip) (bool, error)` in `server/db/suggestions.go`
+- Register `GET /api/suggestions/check` route in `server/main.go`
 
 ## Frontend changes
 
-### Routing — `App.tsx`
+### Component refactor
 
-Add `react-router-dom`. Wrap app in `BrowserRouter`. Two routes:
+Extract the suggestion form (inputs, submit, success/error states) from `SuggestionModal` into a standalone `SuggestionForm` component:
+
+- `client/src/components/SuggestionForm.tsx` — form with `onSuccess?: () => void` prop. Shows "thx 🫶" on success, calls `onSuccess` after 2s delay.
+- `client/src/components/SuggestionForm.css` — input and submit button styles (extracted from `SuggestionModal.css`, renamed from `modal-*` to `suggestion-*`)
+- `client/src/components/SuggestionModal.tsx` — simplified to just modal chrome (overlay, panel, close button) wrapping `SuggestionForm`. Passes `onClose` as `onSuccess`.
+- `client/src/components/SuggestionModal.css` — only modal chrome styles (overlay, panel, close button)
+
+### Routing — `App.tsx` / `main.tsx`
+
+Add `react-router-dom`. Wrap app in `BrowserRouter` in `main.tsx`. Three routes:
 
 | Path | Component |
 |------|-----------|
-| `/` | Current home page content |
+| `/` | `HomePage` (extracted from current `App`) |
 | `/stats` | `StatsPage` |
-
-Extract current home content into a `HomePage` component or keep inline — either way, the suggestion modal state and rendering stays on the home route.
+| `/woah-hold-it-right-there-buckaroo` | `GatePage` |
 
 ### Intro text link
 
-In the intro text, make "stats" a `<Link to="/stats">` styled identically to the "suggestion" span (`.suggestion-link` class or equivalent).
+Make "stats" a `<Link to="/stats">` styled with `.suggestion-link`.
 
 ### `client/src/pages/StatsPage.tsx`
 
-New component. On mount:
+On mount, calls `GET /api/suggestions/check`:
+- Loading: render nothing
+- `has_suggested: false`: `<Navigate to="/woah-hold-it-right-there-buckaroo" replace />`
+- `has_suggested: true`: render placeholder "stats coming soon"
 
-1. Call `GET /api/suggestions/check`
-2. While loading: show nothing (or the same `Loading...` pattern)
-3. If `has_suggested` is false: render the gate message
-4. If `has_suggested` is true: render placeholder stats content
+### `client/src/pages/GatePage.tsx`
 
-**Gate message** — centered `<p>` matching `.app-description` style:
+Renders the denial message as `app-description` text followed by an inline `SuggestionForm`. The form's `onSuccess` calls `navigate("/stats")`.
 
-> woah hold on a second. gonna need that song <span>suggestion</span> first. you thought i wasn't gonna check but this is really a ploy to get song suggestions. jokes on you.
-
-Where "suggestion" is a clickable span (same style as home page) that opens the `SuggestionModal`. On successful suggestion submit (modal closes after "thx 🫶"), automatically re-check the endpoint and show the stats content — no manual navigation needed.
-
-**Placeholder stats content** — centered `<p>` in same style:
-
-> stats coming soon
+Message text:
+> woah hold on a second. gonna need that song suggestion first. you thought i wasn't gonna check but this is really a ploy to get song suggestions. jokes on you.
 
 ### `client/src/api/suggestions.ts`
 
@@ -90,15 +93,17 @@ export async function checkSuggestion(): Promise<{ has_suggested: boolean }> {
 
 ### Server-side catch-all
 
-The Go server needs to serve `index.html` for any non-`/api/` route so that navigating directly to `/stats` works (client-side routing). If this isn't already handled, add a catch-all fallback in `server/main.go` that serves the SPA index for unmatched routes.
+Already handled by existing `spaMiddleware` in `server/main.go` — serves `index.html` for any non-`/api/` route.
 
 ## Definition of done
 
-- [ ] App uses React Router with `/` and `/stats` routes
+- [ ] Suggestion form extracted into reusable `SuggestionForm` component
+- [ ] `SuggestionModal` uses `SuggestionForm` internally (no duplication)
+- [ ] App uses React Router with `/`, `/stats`, and `/woah-hold-it-right-there-buckaroo` routes
 - [ ] "stats" in intro text is a link to `/stats`, styled like "suggestion"
 - [ ] `GET /api/suggestions/check` returns `{ "has_suggested": true/false }` based on IP
-- [ ] Visiting `/stats` with no prior suggestion shows the gate message
-- [ ] "suggestion" in the gate message opens the suggestion modal
-- [ ] After submitting a suggestion from the gate, stats content appears automatically (no manual nav)
-- [ ] Visiting `/stats` with a prior suggestion shows placeholder stats content
-- [ ] Navigating directly to `/stats` (browser URL bar) works (server serves SPA fallback)
+- [ ] `/stats` redirects to `/woah-hold-it-right-there-buckaroo` if no prior suggestion
+- [ ] Gate page shows denial message with inline suggestion form
+- [ ] After submitting on gate page, user is redirected to `/stats`
+- [ ] `/stats` with a prior suggestion shows placeholder stats content
+- [ ] Direct navigation to any route works (SPA fallback)

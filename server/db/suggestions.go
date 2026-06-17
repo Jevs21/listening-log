@@ -11,6 +11,15 @@ func CountRecentSuggestions(database *sql.DB, ip string) (int, error) {
 	return count, err
 }
 
+func HasSuggested(database *sql.DB, ip string) (bool, error) {
+	var count int
+	err := database.QueryRow(
+		`SELECT COUNT(*) FROM song_suggestion WHERE ip_address = ?`,
+		ip,
+	).Scan(&count)
+	return count > 0, err
+}
+
 func InsertSuggestion(database *sql.DB, link, message, ip string) error {
 	_, err := database.Exec(
 		`INSERT INTO song_suggestion (link, message, ip_address) VALUES (?, ?, ?)`,

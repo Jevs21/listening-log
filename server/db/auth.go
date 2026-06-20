@@ -39,7 +39,7 @@ func UpsertAuth(db *sql.DB, auth SpotifyAuth) error {
 
 	_, err := db.Exec(`
 		UPDATE spotify_auth
-		SET access_token = ?, refresh_token = ?, scope = ?, expiry = ?, updated_at = CURRENT_TIMESTAMP
+		SET access_token = $1, refresh_token = $2, scope = $3, expiry = $4, updated_at = CURRENT_TIMESTAMP
 		WHERE id = 1`,
 		auth.AccessToken, auth.RefreshToken, auth.Scope, auth.Expiry,
 	)

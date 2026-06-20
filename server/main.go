@@ -18,7 +18,7 @@ import (
 func main() {
 	cfg := config.Load()
 
-	database, err := db.Open(cfg.DatabasePath)
+	database, err := db.Open(cfg.DatabaseURL)
 	if err != nil {
 		log.Fatalf("failed to open database: %v", err)
 	}
@@ -55,7 +55,11 @@ func main() {
 	r.GET("/api/suggestions/check", handlers.CheckSuggestion(database))
 
 	// Serve built client in prod (if client/dist exists)
+	// Check ../client/dist first (running from server/), then /client/dist (Docker)
 	clientDist := filepath.Join("..", "client", "dist")
+	if info, err := os.Stat(clientDist); err != nil || !info.IsDir() {
+		clientDist = filepath.Join("/", "client", "dist")
+	}
 	if info, err := os.Stat(clientDist); err == nil && info.IsDir() {
 		r.Use(spaMiddleware(clientDist))
 	}

@@ -4,21 +4,15 @@ import (
 	"database/sql"
 	_ "embed"
 	"fmt"
-	"os"
-	"path/filepath"
 
-	_ "modernc.org/sqlite"
+	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
 //go:embed schema.sql
 var schema string
 
-func Open(dbPath string) (*sql.DB, error) {
-	if err := os.MkdirAll(filepath.Dir(dbPath), 0755); err != nil {
-		return nil, fmt.Errorf("create data dir: %w", err)
-	}
-
-	db, err := sql.Open("sqlite", dbPath)
+func Open(connStr string) (*sql.DB, error) {
+	db, err := sql.Open("pgx", connStr)
 	if err != nil {
 		return nil, fmt.Errorf("open database: %w", err)
 	}

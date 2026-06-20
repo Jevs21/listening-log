@@ -37,7 +37,7 @@ func GetImageGrid(database *sql.DB, mode string, limit int) ([]ImageGridItem, er
 				LIMIT 1
 			)
 			ORDER BY al.updated_at DESC
-			LIMIT ?
+			LIMIT $1
 		`
 	case "tracks":
 		query = `
@@ -53,7 +53,7 @@ func GetImageGrid(database *sql.DB, mode string, limit int) ([]ImageGridItem, er
 				LIMIT 1
 			)
 			ORDER BY t.updated_at DESC
-			LIMIT ?
+			LIMIT $1
 		`
 	default:
 		return nil, fmt.Errorf("invalid mode: %s", mode)

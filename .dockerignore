@@ -1,0 +1,9 @@
+.git
+.env
+data/
+client/node_modules/
+client/dist/
+server/server
+db_backup.sqlite
+*.md
+spec/

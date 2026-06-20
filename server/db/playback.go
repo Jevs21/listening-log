@@ -16,20 +16,11 @@ type PlaybackLog struct {
 }
 
 func InsertPlaybackLog(db *sql.DB, log PlaybackLog) error {
-	isPlaying := 0
-	if log.IsPlaying {
-		isPlaying = 1
-	}
-	shuffle := 0
-	if log.ShuffleState {
-		shuffle = 1
-	}
-
 	_, err := db.Exec(`
 		INSERT INTO playback_log (track_id, progress_ms, duration_ms, is_playing, popularity, device_name, device_type, shuffle_state, repeat_state, context_uri)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-		log.TrackID, log.ProgressMs, log.DurationMs, isPlaying, log.Popularity,
-		log.DeviceName, log.DeviceType, shuffle, log.RepeatState, log.ContextURI,
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+		log.TrackID, log.ProgressMs, log.DurationMs, log.IsPlaying, log.Popularity,
+		log.DeviceName, log.DeviceType, log.ShuffleState, log.RepeatState, log.ContextURI,
 	)
 	return err
 }

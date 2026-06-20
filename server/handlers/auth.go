@@ -22,7 +22,7 @@ type AuthHandler struct {
 func (h *AuthHandler) Login(c *gin.Context) {
 	state := randomState()
 	c.SetSameSite(http.SameSiteLaxMode)
-	c.SetCookie("oauth_state", state, 300, "/", "127.0.0.1", false, true)
+	c.SetCookie("oauth_state", state, 300, "/", "", false, true)
 	url := spotify.AuthorizeURL(h.Cfg.ClientID, h.Cfg.SpotifyRedirectURI, state)
 	c.Redirect(http.StatusFound, url)
 }
@@ -37,7 +37,7 @@ func (h *AuthHandler) Callback(c *gin.Context) {
 
 	// Clear the state cookie
 	c.SetSameSite(http.SameSiteLaxMode)
-	c.SetCookie("oauth_state", "", -1, "/", "127.0.0.1", false, true)
+	c.SetCookie("oauth_state", "", -1, "/", "", false, true)
 
 	code := c.Query("code")
 	if code == "" {
@@ -62,7 +62,7 @@ func (h *AuthHandler) Callback(c *gin.Context) {
 
 	if h.Cfg.SpotifyAllowedUserID != "" && profile.ID != h.Cfg.SpotifyAllowedUserID {
 		log.Printf("spotify auth rejected: user_id=%s not allowed", profile.ID)
-		c.Redirect(http.StatusFound, h.Cfg.ClientBaseURL)
+		c.Redirect(http.StatusFound, redirectURL(h.Cfg.ClientBaseURL))
 		return
 	}
 
@@ -78,7 +78,7 @@ func (h *AuthHandler) Callback(c *gin.Context) {
 		return
 	}
 
-	c.Redirect(http.StatusFound, h.Cfg.ClientBaseURL)
+	c.Redirect(http.StatusFound, redirectURL(h.Cfg.ClientBaseURL))
 }
 
 func (h *AuthHandler) Status(c *gin.Context) {
@@ -92,6 +92,13 @@ func (h *AuthHandler) Status(c *gin.Context) {
 
 func Health(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "ok"})
+}
+
+func redirectURL(base string) string {
+	if base == "" {
+		return "/"
+	}
+	return base
 }
 
 func randomState() string {

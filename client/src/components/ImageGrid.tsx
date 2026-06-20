@@ -5,7 +5,7 @@ import { Tooltip } from "./Tooltip";
 type Mode = "tracks" | "albums";
 
 export function ImageGrid() {
-  const [mode, setMode] = useState<Mode>("tracks");
+  const [mode, setMode] = useState<Mode>("albums");
   const { data } = useImageGrid(mode);
   const images = data?.images ?? [];
 

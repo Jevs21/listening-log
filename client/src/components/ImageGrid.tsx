@@ -23,6 +23,7 @@ export function ImageGrid() {
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(4, 1fr)",
+          alignItems: "center",
           gap: "4px",
           marginTop: "1rem",
         }}
@@ -38,6 +39,7 @@ export function ImageGrid() {
               src={img.url}
               alt={img.album_name}
               style={{
+                display: "block",
                 width: "100%",
                 aspectRatio: "1",
                 objectFit: "cover",

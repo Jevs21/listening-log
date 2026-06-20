@@ -84,3 +84,27 @@ CREATE TABLE IF NOT EXISTS song_suggestion (
 );
 
 CREATE INDEX IF NOT EXISTS idx_song_suggestion_ip_created ON song_suggestion(ip_address, created_at);
+
+CREATE TABLE IF NOT EXISTS analysis_cursor (
+    job_name    TEXT PRIMARY KEY,
+    last_id     BIGINT NOT NULL DEFAULT 0,
+    updated_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS listen (
+    id                  SERIAL PRIMARY KEY,
+    track_id            TEXT NOT NULL,
+    started_at          TIMESTAMP NOT NULL,
+    ended_at            TIMESTAMP NOT NULL,
+    duration_ms         INTEGER NOT NULL,
+    progress_ms         INTEGER NOT NULL,
+    duration_track_ms   INTEGER NOT NULL,
+    poll_count          INTEGER NOT NULL,
+    skipped             BOOLEAN NOT NULL,
+    context_uri         TEXT,
+    device_name         TEXT NOT NULL,
+    created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_listen_track_id ON listen(track_id);
+CREATE INDEX IF NOT EXISTS idx_listen_started_at ON listen(started_at);

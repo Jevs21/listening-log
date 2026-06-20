@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"crypto/rand"
-	"database/sql"
 	"encoding/hex"
 	"log"
 	"net/http"
@@ -15,7 +14,7 @@ import (
 )
 
 type AuthHandler struct {
-	DB  *sql.DB
+	DB  *db.DB
 	Cfg config.Config
 }
 
@@ -66,7 +65,7 @@ func (h *AuthHandler) Callback(c *gin.Context) {
 		return
 	}
 
-	err = db.UpsertAuth(h.DB, db.SpotifyAuth{
+	err = h.DB.UpsertAuth(db.SpotifyAuth{
 		AccessToken:  token.AccessToken,
 		RefreshToken: token.RefreshToken,
 		Scope:        token.Scope,
@@ -82,7 +81,7 @@ func (h *AuthHandler) Callback(c *gin.Context) {
 }
 
 func (h *AuthHandler) Status(c *gin.Context) {
-	connected, err := db.IsConnected(h.DB)
+	connected, err := h.DB.IsConnected()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "db error"})
 		return

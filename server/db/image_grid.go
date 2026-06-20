@@ -1,9 +1,6 @@
 package db
 
-import (
-	"database/sql"
-	"fmt"
-)
+import "fmt"
 
 const ImageGridMaxResults = 52
 
@@ -15,7 +12,7 @@ type ImageGridItem struct {
 	UpdatedAt  string `json:"updated_at"`
 }
 
-func GetImageGrid(database *sql.DB, mode string, limit int) ([]ImageGridItem, error) {
+func (d *DB) GetImageGrid(mode string, limit int) ([]ImageGridItem, error) {
 	var query string
 
 	switch mode {
@@ -59,7 +56,7 @@ func GetImageGrid(database *sql.DB, mode string, limit int) ([]ImageGridItem, er
 		return nil, fmt.Errorf("invalid mode: %s", mode)
 	}
 
-	rows, err := database.Query(query, limit)
+	rows, err := d.Query(query, limit)
 	if err != nil {
 		return nil, err
 	}

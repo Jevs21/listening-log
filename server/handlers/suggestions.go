@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"database/sql"
 	"log"
 	"net/http"
 	"net/url"
@@ -18,10 +17,10 @@ type suggestionRequest struct {
 	Source  string `json:"source"`
 }
 
-func CheckSuggestion(database *sql.DB) gin.HandlerFunc {
+func CheckSuggestion(database *db.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ip := c.ClientIP()
-		has, err := db.HasSuggested(database, ip)
+		has, err := database.HasSuggested(ip)
 		if err != nil {
 			log.Printf("suggestion check error: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "something went wrong"})
@@ -31,7 +30,7 @@ func CheckSuggestion(database *sql.DB) gin.HandlerFunc {
 	}
 }
 
-func SubmitSuggestion(database *sql.DB) gin.HandlerFunc {
+func SubmitSuggestion(database *db.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req suggestionRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
@@ -62,7 +61,7 @@ func SubmitSuggestion(database *sql.DB) gin.HandlerFunc {
 
 		ip := c.ClientIP()
 
-		count, err := db.CountRecentSuggestions(database, ip)
+		count, err := database.CountRecentSuggestions(ip)
 		if err != nil {
 			log.Printf("suggestion rate-limit check error: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "something went wrong"})
@@ -81,7 +80,7 @@ func SubmitSuggestion(database *sql.DB) gin.HandlerFunc {
 			return
 		}
 
-		if err := db.InsertSuggestion(database, req.Link, req.Message, req.Source, ip); err != nil {
+		if err := database.InsertSuggestion(req.Link, req.Message, req.Source, ip); err != nil {
 			log.Printf("suggestion insert error: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "something went wrong"})
 			return

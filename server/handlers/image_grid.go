@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"database/sql"
 	"log"
 	"net/http"
 
@@ -10,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func ImageGrid(database *sql.DB) gin.HandlerFunc {
+func ImageGrid(database *db.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		mode := c.DefaultQuery("mode", "tracks")
 		if mode != "tracks" && mode != "albums" {
@@ -18,7 +17,7 @@ func ImageGrid(database *sql.DB) gin.HandlerFunc {
 			return
 		}
 
-		images, err := db.GetImageGrid(database, mode, db.ImageGridMaxResults)
+		images, err := database.GetImageGrid(mode, db.ImageGridMaxResults)
 		if err != nil {
 			log.Printf("image-grid query error: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to query image grid"})

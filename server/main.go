@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"listening-log/server/analysis"
 	"listening-log/server/config"
 	"listening-log/server/db"
 	"listening-log/server/handlers"
@@ -39,6 +40,10 @@ func main() {
 		}
 	}()
 	log.Println("scraper started — polling every 15s (active) / 30s (idle)")
+
+	// Start listen analysis worker
+	analysis.StartWorker(database, 5*time.Minute)
+	log.Println("listen analysis worker started — running every 5m")
 
 	auth := &handlers.AuthHandler{DB: database, Cfg: cfg}
 

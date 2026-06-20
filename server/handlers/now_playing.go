@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"database/sql"
 	"log"
 	"net/http"
 
@@ -10,9 +9,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func NowPlaying(database *sql.DB) gin.HandlerFunc {
+func NowPlaying(database *db.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		track, err := db.GetNowPlaying(database)
+		track, err := database.GetNowPlaying()
 		if err != nil {
 			log.Printf("now-playing query error: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to query now playing"})

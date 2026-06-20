@@ -5,6 +5,8 @@ services:
       POSTGRES_USER: listening_log
       POSTGRES_PASSWORD: listening_log
       POSTGRES_DB: listening_log
+    ports:
+      - "5432:5432" # remove in production
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:

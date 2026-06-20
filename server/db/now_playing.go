@@ -16,8 +16,8 @@ type NowPlayingTrack struct {
 	AlbumImageURL *string   `json:"album_image_url"`
 }
 
-func GetNowPlaying(database *sql.DB) (*NowPlayingTrack, error) {
-	row := database.QueryRow(`
+func (d *DB) GetNowPlaying() (*NowPlayingTrack, error) {
+	row := d.QueryRow(`
 		SELECT
 			t.spotify_id,
 			t.name,

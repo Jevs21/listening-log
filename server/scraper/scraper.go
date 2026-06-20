@@ -17,8 +17,8 @@ const (
 	PollIntervalIdle   = 45 * time.Second
 )
 
-func Poll(database *sql.DB, cfg config.Config) bool {
-	auth, err := db.ReadAuth(database)
+func Poll(database *db.DB, cfg config.Config) bool {
+	auth, err := database.ReadAuth()
 	if err != nil {
 		log.Printf("scraper: error reading auth: %v", err)
 		return false
@@ -36,7 +36,7 @@ func Poll(database *sql.DB, cfg config.Config) bool {
 			return false
 		}
 		expiry := spotify.ExpiryFromNow(token.ExpiresIn)
-		if err := db.UpsertAuth(database, db.SpotifyAuth{
+		if err := database.UpsertAuth(db.SpotifyAuth{
 			AccessToken:  token.AccessToken,
 			RefreshToken: token.RefreshToken,
 			Expiry:       expiry,
@@ -72,31 +72,30 @@ func Poll(database *sql.DB, cfg config.Config) bool {
 		return true
 	}
 
-	// Insert metadata (artist, album, album images, track)
-	if err := db.InsertMetadata(database, *ps.Item); err != nil {
-		log.Printf("scraper: error inserting metadata: %v", err)
-		return true
-	}
-
-	// Log to database
+	// Insert metadata + playback log in a single transaction
 	var contextURI *string
 	if ps.Context != nil {
 		contextURI = &ps.Context.URI
 	}
 
-	if err := db.InsertPlaybackLog(database, db.PlaybackLog{
-		TrackID:      ps.Item.ID,
-		ProgressMs:   ps.ProgressMs,
-		DurationMs:   ps.Item.DurationMs,
-		IsPlaying:    ps.IsPlaying,
-		Popularity:   ps.Item.Popularity,
-		DeviceName:   ps.Device.Name,
-		DeviceType:   ps.Device.Type,
-		ShuffleState: ps.ShuffleState,
-		RepeatState:  ps.RepeatState,
-		ContextURI:   contextURI,
+	if err := database.WithTx(func(tx *sql.Tx) error {
+		if err := db.InsertMetadataTx(tx, *ps.Item); err != nil {
+			return err
+		}
+		return db.InsertPlaybackLogTx(tx, db.PlaybackLog{
+			TrackID:      ps.Item.ID,
+			ProgressMs:   ps.ProgressMs,
+			DurationMs:   ps.Item.DurationMs,
+			IsPlaying:    ps.IsPlaying,
+			Popularity:   ps.Item.Popularity,
+			DeviceName:   ps.Device.Name,
+			DeviceType:   ps.Device.Type,
+			ShuffleState: ps.ShuffleState,
+			RepeatState:  ps.RepeatState,
+			ContextURI:   contextURI,
+		})
 	}); err != nil {
-		log.Printf("scraper: error inserting playback log: %v", err)
+		log.Printf("scraper: error inserting data: %v", err)
 		return true
 	}
 

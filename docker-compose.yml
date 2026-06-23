@@ -9,11 +9,33 @@ services:
       - "5432:5432" # remove in production
     volumes:
       - pgdata:/var/lib/postgresql/data
+      - ./postgres/primary/postgresql.conf:/etc/postgresql/postgresql.conf
+      - ./postgres/primary/pg_hba.conf:/etc/postgresql/pg_hba.conf
+      - ./postgres/primary/init-replication.sh:/docker-entrypoint-initdb.d/init-replication.sh
+    command: postgres -c config_file=/etc/postgresql/postgresql.conf -c hba_file=/etc/postgresql/pg_hba.conf
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "listening_log"]
       interval: 5s
       timeout: 3s
       retries: 5
+
+  db-replica:
+    image: postgres:17-alpine
+    environment:
+      PGPASSWORD: replicator
+    volumes:
+      - pgdata-replica:/var/lib/postgresql/data
+      - ./postgres/replica/entrypoint.sh:/entrypoint.sh
+    entrypoint: ["/bin/bash", "/entrypoint.sh"]
+    user: postgres
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "listening_log"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
   app:
     build: .
@@ -26,5 +48,21 @@ services:
       db:
         condition: service_healthy
 
+  metabase:
+    image: metabase/metabase:latest
+    ports:
+      - "3000:3000"
+    environment:
+      MB_DB_TYPE: h2
+      MB_JETTY_HOST: 0.0.0.0
+      MB_JETTY_PORT: 3000
+    volumes:
+      - metabase-data:/metabase-data
+    depends_on:
+      db-replica:
+        condition: service_healthy
+
 volumes:
   pgdata:
+  pgdata-replica:
+  metabase-data:

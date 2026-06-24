@@ -61,6 +61,23 @@ services:
     depends_on:
       db-replica:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
+
+  metabase-setup:
+    image: alpine:latest
+    entrypoint: ["/bin/sh", "-c", "apk add --no-cache curl jq && /setup.sh"]
+    volumes:
+      - ./metabase/setup.sh:/setup.sh:ro
+    env_file: .env
+    depends_on:
+      metabase:
+        condition: service_healthy
+    restart: "no"
 
 volumes:
   pgdata:

@@ -18,8 +18,10 @@ export function StatsPage() {
   if (!dashboardURL) return <Loading />;
 
   return (
-    <div className="app-container">
-      <h1 className="app-title">listening-log</h1>
+    <div className="app-container" style={{ maxWidth: "90vw" }}>
+      <h1 className="app-title" style={{ textAlign: "center" }}>
+        listening-log
+      </h1>
       <iframe
         src={dashboardURL}
         style={{ width: "100%", height: "calc(100vh - 80px)", border: "none" }}

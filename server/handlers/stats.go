@@ -17,7 +17,7 @@ func DashboardURL(metabaseURL string) gin.HandlerFunc {
 			return
 		}
 
-		url := fmt.Sprintf("%s/public/dashboard/%s#bordered=false&titled=false&theme=transparent",
+		url := fmt.Sprintf("%s/public/dashboard/%s#theme=night&background=false&bordered=false&titled=false",
 			strings.TrimRight(metabaseURL, "/"),
 			strings.TrimSpace(string(uuid)),
 		)

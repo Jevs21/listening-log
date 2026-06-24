@@ -4,6 +4,8 @@ set -e
 # Expects: MB_URL, SESSION_TOKEN
 AUTH_HEADER="X-Metabase-Session: $SESSION_TOKEN"
 DASHBOARD_DIR="/dashboards"
+SHARED_DIR="/shared"
+mkdir -p "$SHARED_DIR"
 
 # Find the replica database ID
 DB_ID=$(curl -s "$MB_URL/api/database" \
@@ -75,36 +77,61 @@ for file in "$DASHBOARD_DIR"/*.json; do
     jq -r ".[] | select(.name == \"$DASHBOARD_NAME\") | .id" | head -1)
 
   if [ -n "$EXISTING_DASH" ]; then
-    echo "  Dashboard '$DASHBOARD_NAME' already exists (id=$EXISTING_DASH), skipping."
-    continue
+    echo "  Dashboard '$DASHBOARD_NAME' already exists (id=$EXISTING_DASH)."
+  else
+    echo "  Creating dashboard '$DASHBOARD_NAME'..."
+    DASH_ID=$(curl -s -X POST "$MB_URL/api/dashboard" \
+      -H "Content-Type: application/json" \
+      -H "$AUTH_HEADER" \
+      -d "$(jq -n --arg name "$DASHBOARD_NAME" --arg desc "$DASHBOARD_DESC" \
+        '{ name: $name, description: $desc }')" | jq -r '.id')
+
+    echo "  Created dashboard (id=$DASH_ID)"
+
+    # --- Add cards to dashboard ---
+    CARDS_PAYLOAD=$(jq -c --argjson ref_map "$REF_MAP" \
+      '[.cards | to_entries[] | {
+        id: (-.key - 1),
+        card_id: ($ref_map[.value.ref] | tonumber),
+        row: .value.row,
+        col: .value.col,
+        size_x: .value.size_x,
+        size_y: .value.size_y
+      }]' "$file")
+
+    curl -s -X PUT "$MB_URL/api/dashboard/$DASH_ID" \
+      -H "Content-Type: application/json" \
+      -H "$AUTH_HEADER" \
+      -d "$(jq -n --argjson dashcards "$CARDS_PAYLOAD" '{ dashcards: $dashcards }')" > /dev/null
+
+    echo "  Added cards to dashboard."
   fi
 
-  echo "  Creating dashboard '$DASHBOARD_NAME'..."
-  DASH_ID=$(curl -s -X POST "$MB_URL/api/dashboard" \
+  # Use DASH_ID from creation, or EXISTING_DASH if it already existed
+  FINAL_DASH_ID="${DASH_ID:-$EXISTING_DASH}"
+
+  # --- Enable public sharing (idempotent) ---
+  curl -s -X PUT "$MB_URL/api/setting/enable-public-sharing" \
     -H "Content-Type: application/json" \
     -H "$AUTH_HEADER" \
-    -d "$(jq -n --arg name "$DASHBOARD_NAME" --arg desc "$DASHBOARD_DESC" \
-      '{ name: $name, description: $desc }')" | jq -r '.id')
+    -d '{"value": true}' > /dev/null
 
-  echo "  Created dashboard (id=$DASH_ID)"
+  # --- Get or create public link ---
+  PUBLIC_UUID=$(curl -s "$MB_URL/api/dashboard/$FINAL_DASH_ID" \
+    -H "$AUTH_HEADER" | jq -r '.public_uuid // empty')
 
-  # --- Add cards to dashboard ---
-  CARDS_PAYLOAD=$(jq -c --argjson ref_map "$REF_MAP" \
-    '[.cards | to_entries[] | {
-      id: (-.key - 1),
-      card_id: ($ref_map[.value.ref] | tonumber),
-      row: .value.row,
-      col: .value.col,
-      size_x: .value.size_x,
-      size_y: .value.size_y
-    }]' "$file")
+  if [ -z "$PUBLIC_UUID" ]; then
+    echo "  Creating public link for dashboard '$DASHBOARD_NAME'..."
+    PUBLIC_UUID=$(curl -s -X POST "$MB_URL/api/dashboard/$FINAL_DASH_ID/public_link" \
+      -H "$AUTH_HEADER" | jq -r '.uuid')
+    echo "  Public UUID: $PUBLIC_UUID"
+  else
+    echo "  Dashboard '$DASHBOARD_NAME' already has public link (uuid=$PUBLIC_UUID)"
+  fi
 
-  curl -s -X PUT "$MB_URL/api/dashboard/$DASH_ID" \
-    -H "Content-Type: application/json" \
-    -H "$AUTH_HEADER" \
-    -d "$(jq -n --argjson dashcards "$CARDS_PAYLOAD" '{ dashcards: $dashcards }')" > /dev/null
-
-  echo "  Added cards to dashboard."
+  # Write UUID to shared volume for the app to read
+  echo "$PUBLIC_UUID" > "$SHARED_DIR/dashboard-uuid"
+  echo "  Wrote public UUID to $SHARED_DIR/dashboard-uuid"
 done
 
 echo "Dashboard loading complete."

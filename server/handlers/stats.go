@@ -1,0 +1,27 @@
+package handlers
+
+import (
+	"fmt"
+	"net/http"
+	"os"
+	"strings"
+
+	"github.com/gin-gonic/gin"
+)
+
+func DashboardURL(metabaseURL string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		uuid, err := os.ReadFile("/shared/dashboard-uuid")
+		if err != nil {
+			c.JSON(http.StatusServiceUnavailable, gin.H{"error": "dashboard not available yet"})
+			return
+		}
+
+		url := fmt.Sprintf("%s/public/dashboard/%s#bordered=false&titled=false&theme=transparent",
+			strings.TrimRight(metabaseURL, "/"),
+			strings.TrimSpace(string(uuid)),
+		)
+
+		c.JSON(http.StatusOK, gin.H{"url": url})
+	}
+}

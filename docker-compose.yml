@@ -44,6 +44,8 @@ services:
     env_file: .env
     environment:
       DATABASE_URL: postgres://listening_log:listening_log@db:5432/listening_log?sslmode=disable
+    volumes:
+      - metabase-shared:/shared:ro
     depends_on:
       db:
         condition: service_healthy
@@ -75,6 +77,7 @@ services:
       - ./metabase/setup.sh:/setup.sh:ro
       - ./metabase/load-dashboards.sh:/load-dashboards.sh:ro
       - ./metabase/dashboards:/dashboards:ro
+      - metabase-shared:/shared
     env_file: .env
     depends_on:
       metabase:
@@ -85,3 +88,4 @@ volumes:
   pgdata:
   pgdata-replica:
   metabase-data:
+  metabase-shared:

@@ -58,6 +58,7 @@ func main() {
 	r.GET("/api/image-grid", handlers.ImageGrid(database))
 	r.POST("/api/suggestions", handlers.SubmitSuggestion(database))
 	r.GET("/api/suggestions/check", handlers.CheckSuggestion(database))
+	r.GET("/api/stats/dashboard", handlers.DashboardURL(cfg.MetabaseURL))
 
 	// Serve built client in prod (if client/dist exists)
 	// Check ../client/dist first (running from server/), then /client/dist (Docker)

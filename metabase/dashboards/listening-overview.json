@@ -1,0 +1,30 @@
+{
+  "name": "Listening Overview",
+  "description": "High-level listening activity and top artists.",
+  "questions": [
+    {
+      "ref": "listens-per-day",
+      "name": "Listens Per Day",
+      "display": "line",
+      "native_query": "SELECT DATE(l.started_at) AS day, COUNT(*) AS listens FROM listen l WHERE l.started_at >= CURRENT_DATE - INTERVAL '30 days' GROUP BY day ORDER BY day",
+      "visualization_settings": {
+        "graph.x_axis.title_text": "Day",
+        "graph.y_axis.title_text": "Listens"
+      }
+    },
+    {
+      "ref": "top-artists",
+      "name": "Top Artists (Last 30 Days)",
+      "display": "bar",
+      "native_query": "SELECT a.name AS artist, COUNT(*) AS listens FROM listen l JOIN track t ON t.spotify_id = l.track_id JOIN artist a ON a.spotify_id = t.artist_id WHERE l.started_at >= CURRENT_DATE - INTERVAL '30 days' GROUP BY a.name ORDER BY listens DESC LIMIT 15",
+      "visualization_settings": {
+        "graph.x_axis.title_text": "Artist",
+        "graph.y_axis.title_text": "Listens"
+      }
+    }
+  ],
+  "cards": [
+    { "ref": "listens-per-day", "row": 0, "col": 0, "size_x": 12, "size_y": 6 },
+    { "ref": "top-artists",     "row": 6, "col": 0, "size_x": 12, "size_y": 8 }
+  ]
+}

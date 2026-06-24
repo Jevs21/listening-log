@@ -73,6 +73,8 @@ services:
     entrypoint: ["/bin/sh", "-c", "apk add --no-cache curl jq && /setup.sh"]
     volumes:
       - ./metabase/setup.sh:/setup.sh:ro
+      - ./metabase/load-dashboards.sh:/load-dashboards.sh:ro
+      - ./metabase/dashboards:/dashboards:ro
     env_file: .env
     depends_on:
       metabase:

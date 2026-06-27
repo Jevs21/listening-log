@@ -207,6 +207,48 @@
       "name": "Play Count Milestones",
       "display": "table",
       "native_query": "WITH track_plays AS (SELECT track_id, COUNT(*) AS plays FROM listen GROUP BY track_id) SELECT COUNT(*) FILTER (WHERE plays >= 10) AS \"10+ plays\", COUNT(*) FILTER (WHERE plays >= 25) AS \"25+ plays\", COUNT(*) FILTER (WHERE plays >= 50) AS \"50+ plays\", COUNT(*) FILTER (WHERE plays >= 100) AS \"100+ plays\" FROM track_plays"
+    },
+    {
+      "ref": "overall-skip-rate",
+      "name": "Overall Skip Rate",
+      "display": "scalar",
+      "native_query": "SELECT ROUND(COUNT(*) FILTER (WHERE skipped)::numeric / NULLIF(COUNT(*), 0) * 100, 1) AS skip_pct FROM listen"
+    },
+    {
+      "ref": "pct-tracks-over-90",
+      "name": "% Tracks Listened >90%",
+      "display": "scalar",
+      "native_query": "SELECT ROUND(COUNT(*) FILTER (WHERE progress_ms::numeric / NULLIF(duration_track_ms, 0) > 0.9)::numeric / NULLIF(COUNT(*), 0) * 100, 1) AS pct FROM listen"
+    },
+    {
+      "ref": "most-skipped-songs",
+      "name": "Most Skipped Songs",
+      "display": "table",
+      "native_query": "SELECT t.name AS song, a.name AS artist, COUNT(*) AS total_plays, COUNT(*) FILTER (WHERE l.skipped) AS skips, ROUND(COUNT(*) FILTER (WHERE l.skipped)::numeric / NULLIF(COUNT(*), 0) * 100, 1) AS skip_pct FROM listen l JOIN track t ON t.spotify_id = l.track_id JOIN artist a ON a.spotify_id = t.artist_id GROUP BY t.name, a.name HAVING COUNT(*) >= 3 ORDER BY skip_pct DESC LIMIT 15"
+    },
+    {
+      "ref": "least-skipped-songs",
+      "name": "Least Skipped Songs",
+      "display": "table",
+      "native_query": "SELECT t.name AS song, a.name AS artist, COUNT(*) AS total_plays, COUNT(*) FILTER (WHERE l.skipped) AS skips, ROUND(COUNT(*) FILTER (WHERE l.skipped)::numeric / NULLIF(COUNT(*), 0) * 100, 1) AS skip_pct FROM listen l JOIN track t ON t.spotify_id = l.track_id JOIN artist a ON a.spotify_id = t.artist_id GROUP BY t.name, a.name HAVING COUNT(*) >= 5 ORDER BY skip_pct ASC, total_plays DESC LIMIT 15"
+    },
+    {
+      "ref": "artists-highest-skip-rate",
+      "name": "Artists with Highest Skip Rate",
+      "display": "table",
+      "native_query": "SELECT a.name AS artist, COUNT(*) AS total_plays, COUNT(*) FILTER (WHERE l.skipped) AS skips, ROUND(COUNT(*) FILTER (WHERE l.skipped)::numeric / NULLIF(COUNT(*), 0) * 100, 1) AS skip_pct FROM listen l JOIN track t ON t.spotify_id = l.track_id JOIN artist a ON a.spotify_id = t.artist_id GROUP BY a.name HAVING COUNT(*) >= 5 ORDER BY skip_pct DESC LIMIT 15"
+    },
+    {
+      "ref": "frequently-abandoned",
+      "name": "Frequently Abandoned",
+      "display": "table",
+      "native_query": "SELECT t.name AS song, a.name AS artist, COUNT(*) AS plays, ROUND(AVG(l.progress_ms::numeric / NULLIF(l.duration_track_ms, 0) * 100), 1) AS avg_completion_pct FROM listen l JOIN track t ON t.spotify_id = l.track_id JOIN artist a ON a.spotify_id = t.artist_id GROUP BY t.name, a.name HAVING COUNT(*) >= 3 AND AVG(l.progress_ms::numeric / NULLIF(l.duration_track_ms, 0)) < 0.5 ORDER BY avg_completion_pct ASC LIMIT 15"
+    },
+    {
+      "ref": "album-completion-rate",
+      "name": "Album Completion Rate",
+      "display": "table",
+      "native_query": "SELECT al.name AS album, a.name AS artist, al.total_tracks, COUNT(DISTINCT l.track_id) AS tracks_heard, ROUND(COUNT(DISTINCT l.track_id)::numeric / NULLIF(al.total_tracks, 0) * 100, 1) AS completion_pct FROM listen l JOIN track t ON t.spotify_id = l.track_id JOIN album al ON al.spotify_id = t.album_id JOIN artist a ON a.spotify_id = t.artist_id WHERE al.total_tracks > 1 GROUP BY al.name, a.name, al.total_tracks ORDER BY completion_pct DESC, tracks_heard DESC LIMIT 20"
     }
   ],
   "cards": [
@@ -243,6 +285,14 @@
     { "ref": "most-replayed-song-month", "row": 55, "col": 12, "size_x": 12, "size_y": 8 },
     { "ref": "most-replayed-album",      "row": 63, "col": 0,  "size_x": 12, "size_y": 8 },
     { "ref": "most-replayed-artist",     "row": 63, "col": 12, "size_x": 12, "size_y": 8 },
-    { "ref": "play-count-milestones",    "row": 71, "col": 0,  "size_x": 24, "size_y": 4 }
+    { "ref": "play-count-milestones",    "row": 71, "col": 0,  "size_x": 24, "size_y": 4 },
+    { "type": "heading", "text": "Skipping & Completion", "row": 75, "col": 0, "size_x": 24, "size_y": 1 },
+    { "ref": "overall-skip-rate",        "row": 76, "col": 0,  "size_x": 12, "size_y": 3 },
+    { "ref": "pct-tracks-over-90",       "row": 76, "col": 12, "size_x": 12, "size_y": 3 },
+    { "ref": "most-skipped-songs",       "row": 79, "col": 0,  "size_x": 12, "size_y": 8 },
+    { "ref": "least-skipped-songs",      "row": 79, "col": 12, "size_x": 12, "size_y": 8 },
+    { "ref": "artists-highest-skip-rate","row": 87, "col": 0,  "size_x": 12, "size_y": 8 },
+    { "ref": "frequently-abandoned",     "row": 87, "col": 12, "size_x": 12, "size_y": 8 },
+    { "ref": "album-completion-rate",    "row": 95, "col": 0,  "size_x": 24, "size_y": 8 }
   ]
 }

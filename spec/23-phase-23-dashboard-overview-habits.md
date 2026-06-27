@@ -220,24 +220,26 @@ FROM listen GROUP BY period
 
 Starting at row 14 (after existing cards which occupy rows 0–13).
 
+Note: Metabase uses a 24-column grid.
+
 | Row | Col | Size | Card |
 |-----|-----|------|------|
-| 14 | 0 | 12×1 | Heading: "Overview" |
-| 15 | 0 | 3×3 | total-hours |
-| 15 | 3 | 3×3 | total-unique-songs |
-| 15 | 6 | 3×3 | total-unique-albums |
-| 15 | 9 | 3×3 | total-unique-artists |
-| 18 | 0 | 4×3 | avg-minutes-per-day |
-| 18 | 4 | 4×3 | current-listening-streak |
-| 18 | 8 | 4×3 | longest-listening-streak |
-| 21 | 0 | 12×1 | Heading: "Listening Habits" |
-| 22 | 0 | 4×3 | total-sessions |
-| 22 | 4 | 4×3 | avg-session-minutes |
-| 22 | 8 | 4×3 | longest-session-minutes |
-| 25 | 0 | 12×8 | on-repeat-7d |
-| 33 | 0 | 6×6 | listens-by-hour |
-| 33 | 6 | 6×6 | listens-by-day-of-week |
-| 39 | 0 | 6×5 | weekday-vs-weekend |
+| 14 | 0 | 24×1 | Heading: "Overview" |
+| 15 | 0 | 6×3 | total-hours |
+| 15 | 6 | 6×3 | total-unique-songs |
+| 15 | 12 | 6×3 | total-unique-albums |
+| 15 | 18 | 6×3 | total-unique-artists |
+| 18 | 0 | 8×3 | avg-minutes-per-day |
+| 18 | 8 | 8×3 | current-listening-streak |
+| 18 | 16 | 8×3 | longest-listening-streak |
+| 21 | 0 | 24×1 | Heading: "Listening Habits" |
+| 22 | 0 | 8×3 | total-sessions |
+| 22 | 8 | 8×3 | avg-session-minutes |
+| 22 | 16 | 8×3 | longest-session-minutes |
+| 25 | 0 | 24×8 | on-repeat-7d |
+| 33 | 0 | 12×6 | listens-by-hour |
+| 33 | 12 | 12×6 | listens-by-day-of-week |
+| 39 | 0 | 12×5 | weekday-vs-weekend |
 
 ## Definition of done
 
@@ -247,5 +249,3 @@ Starting at row 14 (after existing cards which occupy rows 0–13).
 - [ ] Dashboard shows "Listening Habits" heading with 3 session scalars, on-repeat table, hour/day bar charts, and weekday/weekend bar
 - [ ] All scalar cards display a single number
 - [ ] On Repeat table shows song, artist, plays, and minutes for the last 7 days
-- [ ] `docker compose down -v && docker compose up` creates everything from scratch
-- [ ] Subsequent `docker compose up` (existing volume) picks up any new questions/cards added to the JSON

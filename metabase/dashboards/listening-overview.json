@@ -21,10 +21,128 @@
         "graph.x_axis.title_text": "Artist",
         "graph.y_axis.title_text": "Listens"
       }
+    },
+    {
+      "ref": "total-hours",
+      "name": "Total Hours",
+      "display": "scalar",
+      "native_query": "SELECT ROUND(SUM(duration_ms) / 3600000.0, 1) AS hours FROM listen"
+    },
+    {
+      "ref": "total-unique-songs",
+      "name": "Total Unique Songs",
+      "display": "scalar",
+      "native_query": "SELECT COUNT(DISTINCT track_id) AS songs FROM listen"
+    },
+    {
+      "ref": "total-unique-albums",
+      "name": "Total Unique Albums",
+      "display": "scalar",
+      "native_query": "SELECT COUNT(DISTINCT t.album_id) AS albums FROM listen l JOIN track t ON t.spotify_id = l.track_id"
+    },
+    {
+      "ref": "total-unique-artists",
+      "name": "Total Unique Artists",
+      "display": "scalar",
+      "native_query": "SELECT COUNT(DISTINCT t.artist_id) AS artists FROM listen l JOIN track t ON t.spotify_id = l.track_id"
+    },
+    {
+      "ref": "avg-minutes-per-day",
+      "name": "Avg Minutes Per Day",
+      "display": "scalar",
+      "native_query": "SELECT ROUND(AVG(daily_min)) AS avg_minutes FROM (SELECT DATE(started_at) AS day, SUM(duration_ms) / 60000.0 AS daily_min FROM listen GROUP BY day) s"
+    },
+    {
+      "ref": "current-listening-streak",
+      "name": "Current Listening Streak",
+      "display": "scalar",
+      "native_query": "WITH listen_days AS (SELECT DISTINCT DATE(started_at) AS day FROM listen), islands AS (SELECT day, day - (ROW_NUMBER() OVER (ORDER BY day))::int AS grp FROM listen_days), streaks AS (SELECT COUNT(*) AS len, MAX(day) AS last_day FROM islands GROUP BY grp) SELECT COALESCE(MAX(len), 0) AS days FROM streaks WHERE last_day >= CURRENT_DATE - 1"
+    },
+    {
+      "ref": "longest-listening-streak",
+      "name": "Longest Listening Streak",
+      "display": "scalar",
+      "native_query": "WITH listen_days AS (SELECT DISTINCT DATE(started_at) AS day FROM listen), islands AS (SELECT day, day - (ROW_NUMBER() OVER (ORDER BY day))::int AS grp FROM listen_days) SELECT COALESCE(MAX(cnt), 0) AS days FROM (SELECT COUNT(*) AS cnt FROM islands GROUP BY grp) s"
+    },
+    {
+      "ref": "total-sessions",
+      "name": "Total Sessions",
+      "display": "scalar",
+      "native_query": "WITH ordered AS (SELECT started_at, ended_at, CASE WHEN started_at - LAG(ended_at) OVER (ORDER BY started_at) > INTERVAL '30 minutes' OR LAG(ended_at) OVER (ORDER BY started_at) IS NULL THEN 1 ELSE 0 END AS new_session FROM listen) SELECT SUM(new_session) AS sessions FROM ordered"
+    },
+    {
+      "ref": "avg-session-minutes",
+      "name": "Avg Session Length (min)",
+      "display": "scalar",
+      "native_query": "WITH ordered AS (SELECT started_at, ended_at, CASE WHEN started_at - LAG(ended_at) OVER (ORDER BY started_at) > INTERVAL '30 minutes' OR LAG(ended_at) OVER (ORDER BY started_at) IS NULL THEN 1 ELSE 0 END AS new_session FROM listen), sessioned AS (SELECT *, SUM(new_session) OVER (ORDER BY started_at) AS sid FROM ordered) SELECT ROUND(AVG(EXTRACT(EPOCH FROM (session_end - session_start)) / 60)) AS avg_minutes FROM (SELECT sid, MIN(started_at) AS session_start, MAX(ended_at) AS session_end FROM sessioned GROUP BY sid) s"
+    },
+    {
+      "ref": "longest-session-minutes",
+      "name": "Longest Session (min)",
+      "display": "scalar",
+      "native_query": "WITH ordered AS (SELECT started_at, ended_at, CASE WHEN started_at - LAG(ended_at) OVER (ORDER BY started_at) > INTERVAL '30 minutes' OR LAG(ended_at) OVER (ORDER BY started_at) IS NULL THEN 1 ELSE 0 END AS new_session FROM listen), sessioned AS (SELECT *, SUM(new_session) OVER (ORDER BY started_at) AS sid FROM ordered) SELECT ROUND(MAX(EXTRACT(EPOCH FROM (session_end - session_start)) / 60)) AS minutes FROM (SELECT sid, MIN(started_at) AS session_start, MAX(ended_at) AS session_end FROM sessioned GROUP BY sid) s"
+    },
+    {
+      "ref": "on-repeat-7d",
+      "name": "On Repeat (Last 7 Days)",
+      "display": "table",
+      "native_query": "SELECT t.name AS song, a.name AS artist, COUNT(*) AS plays, ROUND(SUM(l.duration_ms) / 60000.0) AS minutes FROM listen l JOIN track t ON t.spotify_id = l.track_id JOIN artist a ON a.spotify_id = t.artist_id WHERE l.started_at >= CURRENT_DATE - INTERVAL '7 days' GROUP BY t.name, a.name ORDER BY plays DESC LIMIT 10"
+    },
+    {
+      "ref": "listens-by-hour",
+      "name": "Listens by Hour of Day",
+      "display": "bar",
+      "native_query": "SELECT EXTRACT(HOUR FROM started_at)::int AS hour, COUNT(*) AS listens FROM listen GROUP BY hour ORDER BY hour",
+      "visualization_settings": {
+        "graph.dimensions": ["hour"],
+        "graph.metrics": ["listens"],
+        "graph.x_axis.title_text": "Hour",
+        "graph.y_axis.title_text": "Listens"
+      }
+    },
+    {
+      "ref": "listens-by-day-of-week",
+      "name": "Listens by Day of Week",
+      "display": "bar",
+      "native_query": "SELECT TO_CHAR(started_at, 'Dy') AS day, EXTRACT(ISODOW FROM started_at)::int AS day_num, COUNT(*) AS listens FROM listen GROUP BY day, day_num ORDER BY day_num",
+      "visualization_settings": {
+        "graph.dimensions": ["day"],
+        "graph.metrics": ["listens"],
+        "graph.x_axis.title_text": "Day",
+        "graph.y_axis.title_text": "Listens"
+      }
+    },
+    {
+      "ref": "weekday-vs-weekend",
+      "name": "Weekday vs Weekend Minutes",
+      "display": "bar",
+      "native_query": "SELECT CASE WHEN EXTRACT(ISODOW FROM started_at) <= 5 THEN 'Weekday' ELSE 'Weekend' END AS period, ROUND(SUM(duration_ms) / 60000.0) AS minutes FROM listen GROUP BY period",
+      "visualization_settings": {
+        "graph.dimensions": ["period"],
+        "graph.metrics": ["minutes"],
+        "graph.x_axis.title_text": "Period",
+        "graph.y_axis.title_text": "Minutes"
+      }
     }
   ],
   "cards": [
-    { "ref": "listens-per-day", "row": 0, "col": 0, "size_x": 12, "size_y": 6 },
-    { "ref": "top-artists",     "row": 6, "col": 0, "size_x": 12, "size_y": 8 }
+    { "ref": "listens-per-day", "row": 0, "col": 0, "size_x": 24, "size_y": 6 },
+    { "ref": "top-artists",     "row": 6, "col": 0, "size_x": 24, "size_y": 8 },
+    { "type": "heading", "text": "Overview",         "row": 14, "col": 0, "size_x": 24, "size_y": 1 },
+    { "ref": "total-hours",              "row": 15, "col": 0,  "size_x": 6, "size_y": 3 },
+    { "ref": "total-unique-songs",       "row": 15, "col": 6,  "size_x": 6, "size_y": 3 },
+    { "ref": "total-unique-albums",      "row": 15, "col": 12, "size_x": 6, "size_y": 3 },
+    { "ref": "total-unique-artists",     "row": 15, "col": 18, "size_x": 6, "size_y": 3 },
+    { "ref": "avg-minutes-per-day",      "row": 18, "col": 0,  "size_x": 8, "size_y": 3 },
+    { "ref": "current-listening-streak", "row": 18, "col": 8,  "size_x": 8, "size_y": 3 },
+    { "ref": "longest-listening-streak", "row": 18, "col": 16, "size_x": 8, "size_y": 3 },
+    { "type": "heading", "text": "Listening Habits", "row": 21, "col": 0, "size_x": 24, "size_y": 1 },
+    { "ref": "total-sessions",           "row": 22, "col": 0,  "size_x": 8, "size_y": 3 },
+    { "ref": "avg-session-minutes",      "row": 22, "col": 8,  "size_x": 8, "size_y": 3 },
+    { "ref": "longest-session-minutes",  "row": 22, "col": 16, "size_x": 8, "size_y": 3 },
+    { "ref": "on-repeat-7d",             "row": 25, "col": 0,  "size_x": 24, "size_y": 8 },
+    { "ref": "listens-by-hour",          "row": 33, "col": 0,  "size_x": 12, "size_y": 6 },
+    { "ref": "listens-by-day-of-week",   "row": 33, "col": 12, "size_x": 12, "size_y": 6 },
+    { "ref": "weekday-vs-weekend",       "row": 39, "col": 0,  "size_x": 12, "size_y": 5 }
   ]
 }

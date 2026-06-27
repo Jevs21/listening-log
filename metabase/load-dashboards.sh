@@ -78,37 +78,62 @@ for file in "$DASHBOARD_DIR"/*.json; do
 
   if [ -n "$EXISTING_DASH" ]; then
     echo "  Dashboard '$DASHBOARD_NAME' already exists (id=$EXISTING_DASH)."
+    FINAL_DASH_ID="$EXISTING_DASH"
   else
     echo "  Creating dashboard '$DASHBOARD_NAME'..."
-    DASH_ID=$(curl -s -X POST "$MB_URL/api/dashboard" \
+    FINAL_DASH_ID=$(curl -s -X POST "$MB_URL/api/dashboard" \
       -H "Content-Type: application/json" \
       -H "$AUTH_HEADER" \
       -d "$(jq -n --arg name "$DASHBOARD_NAME" --arg desc "$DASHBOARD_DESC" \
         '{ name: $name, description: $desc }')" | jq -r '.id')
 
-    echo "  Created dashboard (id=$DASH_ID)"
-
-    # --- Add cards to dashboard ---
-    CARDS_PAYLOAD=$(jq -c --argjson ref_map "$REF_MAP" \
-      '[.cards | to_entries[] | {
-        id: (-.key - 1),
-        card_id: ($ref_map[.value.ref] | tonumber),
-        row: .value.row,
-        col: .value.col,
-        size_x: .value.size_x,
-        size_y: .value.size_y
-      }]' "$file")
-
-    curl -s -X PUT "$MB_URL/api/dashboard/$DASH_ID" \
-      -H "Content-Type: application/json" \
-      -H "$AUTH_HEADER" \
-      -d "$(jq -n --argjson dashcards "$CARDS_PAYLOAD" '{ dashcards: $dashcards }')" > /dev/null
-
-    echo "  Added cards to dashboard."
+    echo "  Created dashboard (id=$FINAL_DASH_ID)"
   fi
 
-  # Use DASH_ID from creation, or EXISTING_DASH if it already existed
-  FINAL_DASH_ID="${DASH_ID:-$EXISTING_DASH}"
+  # --- Sync cards to dashboard (runs every boot) ---
+  CARDS_PAYLOAD=$(jq -c --argjson ref_map "$REF_MAP" \
+    '[.cards | to_entries[] | .value as $card | .key as $idx |
+      if $card.type == "heading" then
+        {
+          id: (-$idx - 1),
+          card_id: null,
+          row: $card.row,
+          col: $card.col,
+          size_x: $card.size_x,
+          size_y: $card.size_y,
+          visualization_settings: {
+            virtual_card: {
+              name: null,
+              display: "heading",
+              visualization_settings: {},
+              dataset_query: {},
+              archived: false
+            },
+            text: $card.text
+          }
+        }
+      else
+        {
+          id: (-$idx - 1),
+          card_id: ($ref_map[$card.ref] // "" | tonumber),
+          row: $card.row,
+          col: $card.col,
+          size_x: $card.size_x,
+          size_y: $card.size_y
+        }
+      end
+    ]' "$file")
+
+  echo "  Syncing cards to dashboard..."
+  curl -s -X PUT "$MB_URL/api/dashboard/$FINAL_DASH_ID" \
+    -H "Content-Type: application/json" \
+    -H "$AUTH_HEADER" \
+    -d "$(jq -n --argjson dashcards "$CARDS_PAYLOAD" '{ dashcards: $dashcards }')" > /dev/null
+  curl -s -X PUT "$MB_URL/api/dashboard/$FINAL_DASH_ID" \
+    -H "Content-Type: application/json" \
+    -H "$AUTH_HEADER" \
+    -d '{"width": "full"}' > /dev/null
+  echo "  Synced cards."
 
   # --- Enable public sharing (idempotent) ---
   curl -s -X PUT "$MB_URL/api/setting/enable-public-sharing" \

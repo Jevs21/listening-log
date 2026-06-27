@@ -115,21 +115,23 @@ ORDER BY avg_completion_pct DESC LIMIT 25
 
 Starting at row 103 (after phase 25 ends at row 102).
 
+Note: Metabase uses a 24-column grid.
+
 | Row | Col | Size | Card |
 |-----|-----|------|------|
-| 103 | 0 | 12×1 | Heading: "Artist Rankings" |
-| 104 | 0 | 6×10 | top-artists-by-plays |
-| 104 | 6 | 6×10 | top-artists-by-minutes |
-| 114 | 0 | 6×10 | top-artists-by-unique-songs |
-| 114 | 6 | 6×10 | top-artists-by-listening-days |
-| 124 | 0 | 12×1 | Heading: "Album Rankings" |
-| 125 | 0 | 6×10 | top-albums-by-plays |
-| 125 | 6 | 6×10 | top-albums-by-minutes |
-| 135 | 0 | 12×10 | top-albums-by-completion |
-| 145 | 0 | 12×1 | Heading: "Song Rankings" |
-| 146 | 0 | 6×10 | top-songs-by-plays |
-| 146 | 6 | 6×10 | top-songs-by-minutes |
-| 156 | 0 | 12×10 | top-songs-by-completion |
+| 103 | 0 | 24×1 | Heading: "Artist Rankings" |
+| 104 | 0 | 12×10 | top-artists-by-plays |
+| 104 | 12 | 12×10 | top-artists-by-minutes |
+| 114 | 0 | 12×10 | top-artists-by-unique-songs |
+| 114 | 12 | 12×10 | top-artists-by-listening-days |
+| 124 | 0 | 24×1 | Heading: "Album Rankings" |
+| 125 | 0 | 12×10 | top-albums-by-plays |
+| 125 | 12 | 12×10 | top-albums-by-minutes |
+| 135 | 0 | 24×10 | top-albums-by-completion |
+| 145 | 0 | 24×1 | Heading: "Song Rankings" |
+| 146 | 0 | 12×10 | top-songs-by-plays |
+| 146 | 12 | 12×10 | top-songs-by-minutes |
+| 156 | 0 | 24×10 | top-songs-by-completion |
 
 ## Definition of done
 

@@ -220,25 +220,27 @@ ORDER BY spike DESC LIMIT 15
 
 Starting at row 201 (after phase 27 ends at row 200).
 
+Note: Metabase uses a 24-column grid.
+
 | Row | Col | Size | Card |
 |-----|-----|------|------|
-| 201 | 0 | 12×1 | Heading: "Deep Cuts" |
-| 202 | 0 | 4×3 | avg-song-length |
-| 202 | 4 | 4×3 | total-days-of-music |
-| 202 | 8 | 4×3 | est-tb-streamed |
-| 205 | 0 | 6×8 | deepest-artist-dive |
-| 205 | 6 | 6×8 | deepest-album-dive |
-| 213 | 0 | 6×6 | longest-songs-listened |
-| 213 | 6 | 6×6 | shortest-songs-listened |
-| 219 | 0 | 6×6 | oldest-releases |
-| 219 | 6 | 6×6 | newest-releases |
-| 225 | 0 | 12×1 | Heading: "Fun Stats" |
-| 226 | 0 | 6×8 | one-hit-wonders |
-| 226 | 6 | 6×8 | most-loyal-artists |
-| 234 | 0 | 6×8 | most-binged-album |
-| 234 | 6 | 6×8 | forgotten-favorites |
-| 242 | 0 | 12×10 | soundtrack-of-your-life |
-| 252 | 0 | 12×8 | obsession-detector |
+| 201 | 0 | 24×1 | Heading: "Deep Cuts" |
+| 202 | 0 | 8×3 | avg-song-length |
+| 202 | 8 | 8×3 | total-days-of-music |
+| 202 | 16 | 8×3 | est-tb-streamed |
+| 205 | 0 | 12×8 | deepest-artist-dive |
+| 205 | 12 | 12×8 | deepest-album-dive |
+| 213 | 0 | 12×6 | longest-songs-listened |
+| 213 | 12 | 12×6 | shortest-songs-listened |
+| 219 | 0 | 12×6 | oldest-releases |
+| 219 | 12 | 12×6 | newest-releases |
+| 225 | 0 | 24×1 | Heading: "Fun Stats" |
+| 226 | 0 | 12×8 | one-hit-wonders |
+| 226 | 12 | 12×8 | most-loyal-artists |
+| 234 | 0 | 12×8 | most-binged-album |
+| 234 | 12 | 12×8 | forgotten-favorites |
+| 242 | 0 | 24×10 | soundtrack-of-your-life |
+| 252 | 0 | 24×8 | obsession-detector |
 
 ## Definition of done
 

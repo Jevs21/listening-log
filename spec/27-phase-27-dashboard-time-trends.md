@@ -102,15 +102,17 @@ SELECT day, artist, plays FROM daily WHERE rn = 1 ORDER BY day DESC
 
 Starting at row 166 (after phase 26 ends at row 165).
 
+Note: Metabase uses a 24-column grid.
+
 | Row | Col | Size | Card |
 |-----|-----|------|------|
-| 166 | 0 | 12×1 | Heading: "Time-Based Trends" |
-| 167 | 0 | 12×6 | minutes-per-month |
-| 173 | 0 | 12×6 | unique-artists-per-month |
-| 179 | 0 | 12×6 | listening-growth-mom |
-| 185 | 0 | 6×8 | seasonal-favorites |
-| 185 | 6 | 6×8 | this-day-in-history |
-| 193 | 0 | 12×8 | daily-top-artist |
+| 166 | 0 | 24×1 | Heading: "Time-Based Trends" |
+| 167 | 0 | 24×6 | minutes-per-month |
+| 173 | 0 | 24×6 | unique-artists-per-month |
+| 179 | 0 | 24×6 | listening-growth-mom |
+| 185 | 0 | 12×8 | seasonal-favorites |
+| 185 | 12 | 12×8 | this-day-in-history |
+| 193 | 0 | 24×8 | daily-top-artist |
 
 ## Definition of done
 

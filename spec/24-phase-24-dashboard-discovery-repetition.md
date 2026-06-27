@@ -181,24 +181,26 @@ FROM track_plays
 
 Starting at row 44 (after phase 23 ends at row 43).
 
+Note: Metabase uses a 24-column grid.
+
 | Row | Col | Size | Card |
 |-----|-----|------|------|
-| 44 | 0 | 12×1 | Heading: "Discovery" |
-| 45 | 0 | 3×3 | new-artists-30d |
-| 45 | 3 | 3×3 | new-albums-30d |
-| 45 | 6 | 3×3 | discovery-score |
-| 45 | 9 | 3×3 | avg-music-age |
-| 48 | 0 | 4×3 | pct-new-music-30d |
-| 48 | 4 | 4×3 | one-listen-artists |
-| 48 | 8 | 4×3 | one-listen-albums |
-| 51 | 0 | 12×1 | Heading: "Repetition" |
-| 52 | 0 | 6×3 | repeat-ratio |
-| 52 | 6 | 6×3 | comfort-zone-score |
-| 55 | 0 | 6×8 | most-replayed-song-ever |
-| 55 | 6 | 6×8 | most-replayed-song-month |
-| 63 | 0 | 6×8 | most-replayed-album |
-| 63 | 6 | 6×8 | most-replayed-artist |
-| 71 | 0 | 12×4 | play-count-milestones |
+| 44 | 0 | 24×1 | Heading: "Discovery" |
+| 45 | 0 | 6×3 | new-artists-30d |
+| 45 | 6 | 6×3 | new-albums-30d |
+| 45 | 12 | 6×3 | discovery-score |
+| 45 | 18 | 6×3 | avg-music-age |
+| 48 | 0 | 8×3 | pct-new-music-30d |
+| 48 | 8 | 8×3 | one-listen-artists |
+| 48 | 16 | 8×3 | one-listen-albums |
+| 51 | 0 | 24×1 | Heading: "Repetition" |
+| 52 | 0 | 12×3 | repeat-ratio |
+| 52 | 12 | 12×3 | comfort-zone-score |
+| 55 | 0 | 12×8 | most-replayed-song-ever |
+| 55 | 12 | 12×8 | most-replayed-song-month |
+| 63 | 0 | 12×8 | most-replayed-album |
+| 63 | 12 | 12×8 | most-replayed-artist |
+| 71 | 0 | 24×4 | play-count-milestones |
 
 ## Definition of done
 

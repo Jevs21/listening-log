@@ -104,16 +104,18 @@ ORDER BY completion_pct DESC, tracks_heard DESC LIMIT 20
 
 Starting at row 75 (after phase 24 ends at row 74).
 
+Note: Metabase uses a 24-column grid.
+
 | Row | Col | Size | Card |
 |-----|-----|------|------|
-| 75 | 0 | 12×1 | Heading: "Skipping & Completion" |
-| 76 | 0 | 6×3 | overall-skip-rate |
-| 76 | 6 | 6×3 | pct-tracks-over-90 |
-| 79 | 0 | 6×8 | most-skipped-songs |
-| 79 | 6 | 6×8 | least-skipped-songs |
-| 87 | 0 | 6×8 | artists-highest-skip-rate |
-| 87 | 6 | 6×8 | frequently-abandoned |
-| 95 | 0 | 12×8 | album-completion-rate |
+| 75 | 0 | 24×1 | Heading: "Skipping & Completion" |
+| 76 | 0 | 12×3 | overall-skip-rate |
+| 76 | 12 | 12×3 | pct-tracks-over-90 |
+| 79 | 0 | 12×8 | most-skipped-songs |
+| 79 | 12 | 12×8 | least-skipped-songs |
+| 87 | 0 | 12×8 | artists-highest-skip-rate |
+| 87 | 12 | 12×8 | frequently-abandoned |
+| 95 | 0 | 24×8 | album-completion-rate |
 
 ## Definition of done
 

@@ -289,6 +289,150 @@
       "name": "Top Songs by Completion",
       "display": "table",
       "native_query": "SELECT t.name AS song, a.name AS artist, COUNT(*) AS plays, ROUND(AVG(l.progress_ms::numeric / NULLIF(l.duration_track_ms, 0) * 100), 1) AS avg_completion_pct FROM listen l JOIN track t ON t.spotify_id = l.track_id JOIN artist a ON a.spotify_id = t.artist_id GROUP BY t.name, a.name HAVING COUNT(*) >= 3 ORDER BY avg_completion_pct DESC LIMIT 25"
+    },
+    {
+      "ref": "minutes-per-month",
+      "name": "Minutes Per Month",
+      "display": "line",
+      "native_query": "SELECT TO_CHAR(DATE_TRUNC('month', started_at), 'YYYY-MM') AS month, ROUND(SUM(duration_ms) / 60000.0) AS minutes FROM listen GROUP BY month ORDER BY month",
+      "visualization_settings": {
+        "graph.dimensions": ["month"],
+        "graph.metrics": ["minutes"],
+        "graph.x_axis.title_text": "Month",
+        "graph.y_axis.title_text": "Minutes"
+      }
+    },
+    {
+      "ref": "unique-artists-per-month",
+      "name": "Unique Artists Per Month",
+      "display": "line",
+      "native_query": "SELECT TO_CHAR(DATE_TRUNC('month', l.started_at), 'YYYY-MM') AS month, COUNT(DISTINCT t.artist_id) AS artists FROM listen l JOIN track t ON t.spotify_id = l.track_id GROUP BY month ORDER BY month",
+      "visualization_settings": {
+        "graph.dimensions": ["month"],
+        "graph.metrics": ["artists"],
+        "graph.x_axis.title_text": "Month",
+        "graph.y_axis.title_text": "Artists"
+      }
+    },
+    {
+      "ref": "listening-growth-mom",
+      "name": "Listening Growth (Month-over-Month)",
+      "display": "bar",
+      "native_query": "WITH monthly AS (SELECT DATE_TRUNC('month', started_at) AS month, COUNT(*) AS listens FROM listen GROUP BY month) SELECT TO_CHAR(month, 'YYYY-MM') AS month, listens, ROUND((listens - LAG(listens) OVER (ORDER BY month))::numeric / NULLIF(LAG(listens) OVER (ORDER BY month), 0) * 100, 1) AS growth_pct FROM monthly ORDER BY month",
+      "visualization_settings": {
+        "graph.dimensions": ["month"],
+        "graph.metrics": ["growth_pct"],
+        "graph.x_axis.title_text": "Month",
+        "graph.y_axis.title_text": "Growth %"
+      }
+    },
+    {
+      "ref": "seasonal-favorites",
+      "name": "Seasonal Favorites",
+      "display": "table",
+      "native_query": "WITH quarterly AS (SELECT EXTRACT(YEAR FROM l.started_at)::int AS year, EXTRACT(QUARTER FROM l.started_at)::int AS quarter, a.name AS artist, COUNT(*) AS plays, ROW_NUMBER() OVER (PARTITION BY EXTRACT(YEAR FROM l.started_at), EXTRACT(QUARTER FROM l.started_at) ORDER BY COUNT(*) DESC) AS rn FROM listen l JOIN track t ON t.spotify_id = l.track_id JOIN artist a ON a.spotify_id = t.artist_id GROUP BY year, quarter, a.name) SELECT year, 'Q' || quarter AS quarter, artist, plays FROM quarterly WHERE rn = 1 ORDER BY year DESC, quarter DESC"
+    },
+    {
+      "ref": "this-day-in-history",
+      "name": "This Day in History",
+      "display": "table",
+      "native_query": "SELECT EXTRACT(YEAR FROM l.started_at)::int AS year, t.name AS song, a.name AS artist, COUNT(*) AS plays FROM listen l JOIN track t ON t.spotify_id = l.track_id JOIN artist a ON a.spotify_id = t.artist_id WHERE EXTRACT(MONTH FROM l.started_at) = EXTRACT(MONTH FROM CURRENT_DATE) AND EXTRACT(DAY FROM l.started_at) = EXTRACT(DAY FROM CURRENT_DATE) AND DATE(l.started_at) != CURRENT_DATE GROUP BY year, t.name, a.name ORDER BY year DESC, plays DESC"
+    },
+    {
+      "ref": "daily-top-artist",
+      "name": "Daily Top Artist (Last 30 Days)",
+      "display": "table",
+      "native_query": "WITH daily AS (SELECT DATE(l.started_at) AS day, a.name AS artist, COUNT(*) AS plays, ROW_NUMBER() OVER (PARTITION BY DATE(l.started_at) ORDER BY COUNT(*) DESC) AS rn FROM listen l JOIN track t ON t.spotify_id = l.track_id JOIN artist a ON a.spotify_id = t.artist_id WHERE l.started_at >= CURRENT_DATE - INTERVAL '30 days' GROUP BY day, a.name) SELECT day, artist, plays FROM daily WHERE rn = 1 ORDER BY day DESC"
+    },
+    {
+      "ref": "avg-song-length",
+      "name": "Avg Song Length (min)",
+      "display": "scalar",
+      "native_query": "SELECT ROUND(AVG(duration_ms) / 60000.0, 1) AS avg_minutes FROM (SELECT DISTINCT track_id, duration_track_ms AS duration_ms FROM listen) s"
+    },
+    {
+      "ref": "total-days-of-music",
+      "name": "Total Days of Music",
+      "display": "scalar",
+      "native_query": "SELECT ROUND(SUM(duration_ms) / 86400000.0, 2) AS days FROM listen"
+    },
+    {
+      "ref": "est-tb-streamed",
+      "name": "Est. TB Streamed",
+      "display": "scalar",
+      "native_query": "SELECT ROUND(SUM(duration_ms) / 1000.0 * 160 / 8 / 1024 / 1024 / 1024 / 1024, 3) AS tb FROM listen"
+    },
+    {
+      "ref": "deepest-artist-dive",
+      "name": "Deepest Artist Dive",
+      "display": "table",
+      "native_query": "SELECT a.name AS artist, COUNT(DISTINCT l.track_id) AS unique_songs, COUNT(*) AS total_plays, ROUND(SUM(l.duration_ms) / 60000.0) AS minutes FROM listen l JOIN track t ON t.spotify_id = l.track_id JOIN artist a ON a.spotify_id = t.artist_id GROUP BY a.name ORDER BY unique_songs DESC LIMIT 15"
+    },
+    {
+      "ref": "deepest-album-dive",
+      "name": "Deepest Album Dive",
+      "display": "table",
+      "native_query": "SELECT al.name AS album, a.name AS artist, al.total_tracks, COUNT(DISTINCT l.track_id) AS tracks_heard, COUNT(*) AS total_plays FROM listen l JOIN track t ON t.spotify_id = l.track_id JOIN album al ON al.spotify_id = t.album_id JOIN artist a ON a.spotify_id = t.artist_id WHERE al.total_tracks > 3 GROUP BY al.name, a.name, al.total_tracks ORDER BY tracks_heard DESC, total_plays DESC LIMIT 15"
+    },
+    {
+      "ref": "longest-songs-listened",
+      "name": "Longest Songs Listened",
+      "display": "table",
+      "native_query": "SELECT DISTINCT ON (t.spotify_id) t.name AS song, a.name AS artist, ROUND(t.duration_ms / 60000.0, 1) AS length_min FROM listen l JOIN track t ON t.spotify_id = l.track_id JOIN artist a ON a.spotify_id = t.artist_id ORDER BY t.spotify_id, t.duration_ms DESC LIMIT 10"
+    },
+    {
+      "ref": "shortest-songs-listened",
+      "name": "Shortest Songs Listened",
+      "display": "table",
+      "native_query": "SELECT DISTINCT ON (t.spotify_id) t.name AS song, a.name AS artist, ROUND(t.duration_ms / 1000.0) AS length_sec FROM listen l JOIN track t ON t.spotify_id = l.track_id JOIN artist a ON a.spotify_id = t.artist_id ORDER BY t.spotify_id, t.duration_ms ASC LIMIT 10"
+    },
+    {
+      "ref": "oldest-releases",
+      "name": "Oldest Releases",
+      "display": "table",
+      "native_query": "SELECT al.name AS album, a.name AS artist, al.release_date FROM listen l JOIN track t ON t.spotify_id = l.track_id JOIN album al ON al.spotify_id = t.album_id JOIN artist a ON a.spotify_id = t.artist_id WHERE al.release_date IS NOT NULL AND al.release_date != '' GROUP BY al.name, a.name, al.release_date ORDER BY al.release_date ASC LIMIT 10"
+    },
+    {
+      "ref": "newest-releases",
+      "name": "Newest Releases",
+      "display": "table",
+      "native_query": "SELECT al.name AS album, a.name AS artist, al.release_date FROM listen l JOIN track t ON t.spotify_id = l.track_id JOIN album al ON al.spotify_id = t.album_id JOIN artist a ON a.spotify_id = t.artist_id WHERE al.release_date IS NOT NULL AND al.release_date != '' GROUP BY al.name, a.name, al.release_date ORDER BY al.release_date DESC LIMIT 10"
+    },
+    {
+      "ref": "one-hit-wonders",
+      "name": "One-Hit Wonders",
+      "display": "table",
+      "native_query": "WITH artist_songs AS (SELECT t.artist_id, a.name AS artist, l.track_id, t.name AS song, COUNT(*) AS plays FROM listen l JOIN track t ON t.spotify_id = l.track_id JOIN artist a ON a.spotify_id = t.artist_id GROUP BY t.artist_id, a.name, l.track_id, t.name), artist_totals AS (SELECT artist_id, artist, SUM(plays) AS total_plays, MAX(plays) AS top_song_plays, (ARRAY_AGG(song ORDER BY plays DESC))[1] AS top_song FROM artist_songs GROUP BY artist_id, artist) SELECT artist, top_song, top_song_plays, total_plays, ROUND(top_song_plays::numeric / total_plays * 100, 1) AS concentration_pct FROM artist_totals WHERE total_plays >= 5 AND top_song_plays::numeric / total_plays >= 0.8 ORDER BY total_plays DESC LIMIT 15"
+    },
+    {
+      "ref": "most-loyal-artists",
+      "name": "Most Loyal Artists",
+      "display": "table",
+      "native_query": "SELECT a.name AS artist, COUNT(DISTINCT TO_CHAR(l.started_at, 'YYYY-MM')) AS months_listened, COUNT(*) AS total_plays FROM listen l JOIN track t ON t.spotify_id = l.track_id JOIN artist a ON a.spotify_id = t.artist_id GROUP BY a.name ORDER BY months_listened DESC, total_plays DESC LIMIT 15"
+    },
+    {
+      "ref": "most-binged-album",
+      "name": "Most Binged Album",
+      "display": "table",
+      "native_query": "WITH album_daily AS (SELECT t.album_id, al.name AS album, a.name AS artist, DATE(l.started_at) AS day, COUNT(*) AS plays FROM listen l JOIN track t ON t.spotify_id = l.track_id JOIN album al ON al.spotify_id = t.album_id JOIN artist a ON a.spotify_id = t.artist_id GROUP BY t.album_id, al.name, a.name, day), rolling AS (SELECT album_id, album, artist, day, SUM(plays) OVER (PARTITION BY album_id ORDER BY day RANGE BETWEEN INTERVAL '6 days' PRECEDING AND CURRENT ROW) AS week_plays FROM album_daily) SELECT album, artist, MAX(week_plays) AS peak_week_plays FROM rolling GROUP BY album_id, album, artist ORDER BY peak_week_plays DESC LIMIT 15"
+    },
+    {
+      "ref": "forgotten-favorites",
+      "name": "Forgotten Favorites",
+      "display": "table",
+      "native_query": "SELECT t.name AS song, a.name AS artist, COUNT(*) AS total_plays, MAX(l.started_at) AS last_played FROM listen l JOIN track t ON t.spotify_id = l.track_id JOIN artist a ON a.spotify_id = t.artist_id GROUP BY t.name, a.name HAVING COUNT(*) >= 10 AND MAX(l.started_at) < CURRENT_DATE - INTERVAL '60 days' ORDER BY total_plays DESC LIMIT 15"
+    },
+    {
+      "ref": "soundtrack-of-your-life",
+      "name": "Soundtrack of Your Life",
+      "display": "table",
+      "native_query": "WITH monthly AS (SELECT TO_CHAR(l.started_at, 'YYYY-MM') AS month, t.name AS song, a.name AS artist, COUNT(*) AS plays, ROW_NUMBER() OVER (PARTITION BY TO_CHAR(l.started_at, 'YYYY-MM') ORDER BY COUNT(*) DESC) AS rn FROM listen l JOIN track t ON t.spotify_id = l.track_id JOIN artist a ON a.spotify_id = t.artist_id GROUP BY month, t.name, a.name) SELECT month, song, artist, plays FROM monthly WHERE rn = 1 ORDER BY month DESC"
+    },
+    {
+      "ref": "obsession-detector",
+      "name": "Obsession Detector",
+      "display": "table",
+      "native_query": "WITH weekly AS (SELECT t.artist_id, a.name AS artist, DATE_TRUNC('week', l.started_at)::date AS week, COUNT(*) AS plays FROM listen l JOIN track t ON t.spotify_id = l.track_id JOIN artist a ON a.spotify_id = t.artist_id GROUP BY t.artist_id, a.name, week), with_prev AS (SELECT *, LAG(plays) OVER (PARTITION BY artist_id ORDER BY week) AS prev_plays FROM weekly) SELECT artist, week, plays, prev_plays, plays - COALESCE(prev_plays, 0) AS spike FROM with_prev WHERE plays >= 10 ORDER BY spike DESC LIMIT 15"
     }
   ],
   "cards": [
@@ -343,6 +487,30 @@
     { "type": "heading", "text": "Song Rankings", "row": 145, "col": 0, "size_x": 24, "size_y": 1 },
     { "ref": "top-songs-by-plays",           "row": 146, "col": 0,  "size_x": 12, "size_y": 10 },
     { "ref": "top-songs-by-minutes",         "row": 146, "col": 12, "size_x": 12, "size_y": 10 },
-    { "ref": "top-songs-by-completion",      "row": 156, "col": 0,  "size_x": 24, "size_y": 10 }
+    { "ref": "top-songs-by-completion",      "row": 156, "col": 0,  "size_x": 24, "size_y": 10 },
+    { "type": "heading", "text": "Time-Based Trends", "row": 166, "col": 0, "size_x": 24, "size_y": 1 },
+    { "ref": "minutes-per-month",            "row": 167, "col": 0,  "size_x": 24, "size_y": 6 },
+    { "ref": "unique-artists-per-month",     "row": 173, "col": 0,  "size_x": 24, "size_y": 6 },
+    { "ref": "listening-growth-mom",         "row": 179, "col": 0,  "size_x": 24, "size_y": 6 },
+    { "ref": "seasonal-favorites",           "row": 185, "col": 0,  "size_x": 12, "size_y": 8 },
+    { "ref": "this-day-in-history",          "row": 185, "col": 12, "size_x": 12, "size_y": 8 },
+    { "ref": "daily-top-artist",             "row": 193, "col": 0,  "size_x": 24, "size_y": 8 },
+    { "type": "heading", "text": "Deep Cuts", "row": 201, "col": 0, "size_x": 24, "size_y": 1 },
+    { "ref": "avg-song-length",              "row": 202, "col": 0,  "size_x": 8,  "size_y": 3 },
+    { "ref": "total-days-of-music",          "row": 202, "col": 8,  "size_x": 8,  "size_y": 3 },
+    { "ref": "est-tb-streamed",              "row": 202, "col": 16, "size_x": 8,  "size_y": 3 },
+    { "ref": "deepest-artist-dive",          "row": 205, "col": 0,  "size_x": 12, "size_y": 8 },
+    { "ref": "deepest-album-dive",           "row": 205, "col": 12, "size_x": 12, "size_y": 8 },
+    { "ref": "longest-songs-listened",       "row": 213, "col": 0,  "size_x": 12, "size_y": 6 },
+    { "ref": "shortest-songs-listened",      "row": 213, "col": 12, "size_x": 12, "size_y": 6 },
+    { "ref": "oldest-releases",              "row": 219, "col": 0,  "size_x": 12, "size_y": 6 },
+    { "ref": "newest-releases",              "row": 219, "col": 12, "size_x": 12, "size_y": 6 },
+    { "type": "heading", "text": "Fun Stats", "row": 225, "col": 0, "size_x": 24, "size_y": 1 },
+    { "ref": "one-hit-wonders",              "row": 226, "col": 0,  "size_x": 12, "size_y": 8 },
+    { "ref": "most-loyal-artists",           "row": 226, "col": 12, "size_x": 12, "size_y": 8 },
+    { "ref": "most-binged-album",            "row": 234, "col": 0,  "size_x": 12, "size_y": 8 },
+    { "ref": "forgotten-favorites",          "row": 234, "col": 12, "size_x": 12, "size_y": 8 },
+    { "ref": "soundtrack-of-your-life",      "row": 242, "col": 0,  "size_x": 24, "size_y": 10 },
+    { "ref": "obsession-detector",           "row": 252, "col": 0,  "size_x": 24, "size_y": 8 }
   ]
 }

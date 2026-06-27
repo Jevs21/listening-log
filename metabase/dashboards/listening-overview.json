@@ -3,26 +3,6 @@
   "description": "High-level listening activity and top artists.",
   "questions": [
     {
-      "ref": "listens-per-day",
-      "name": "Listens Per Day",
-      "display": "line",
-      "native_query": "SELECT DATE(l.started_at) AS day, COUNT(*) AS listens FROM listen l WHERE l.started_at >= CURRENT_DATE - INTERVAL '30 days' GROUP BY day ORDER BY day",
-      "visualization_settings": {
-        "graph.x_axis.title_text": "Day",
-        "graph.y_axis.title_text": "Listens"
-      }
-    },
-    {
-      "ref": "top-artists",
-      "name": "Top Artists (Last 30 Days)",
-      "display": "bar",
-      "native_query": "SELECT a.name AS artist, COUNT(*) AS listens FROM listen l JOIN track t ON t.spotify_id = l.track_id JOIN artist a ON a.spotify_id = t.artist_id WHERE l.started_at >= CURRENT_DATE - INTERVAL '30 days' GROUP BY a.name ORDER BY listens DESC LIMIT 15",
-      "visualization_settings": {
-        "graph.x_axis.title_text": "Artist",
-        "graph.y_axis.title_text": "Listens"
-      }
-    },
-    {
       "ref": "total-hours",
       "name": "Total Hours",
       "display": "scalar",
@@ -249,12 +229,69 @@
       "name": "Album Completion Rate",
       "display": "table",
       "native_query": "SELECT al.name AS album, a.name AS artist, al.total_tracks, COUNT(DISTINCT l.track_id) AS tracks_heard, ROUND(COUNT(DISTINCT l.track_id)::numeric / NULLIF(al.total_tracks, 0) * 100, 1) AS completion_pct FROM listen l JOIN track t ON t.spotify_id = l.track_id JOIN album al ON al.spotify_id = t.album_id JOIN artist a ON a.spotify_id = t.artist_id WHERE al.total_tracks > 1 GROUP BY al.name, a.name, al.total_tracks ORDER BY completion_pct DESC, tracks_heard DESC LIMIT 20"
+    },
+    {
+      "ref": "top-artists-by-plays",
+      "name": "Top Artists by Plays",
+      "display": "table",
+      "native_query": "SELECT a.name AS artist, COUNT(*) AS plays FROM listen l JOIN track t ON t.spotify_id = l.track_id JOIN artist a ON a.spotify_id = t.artist_id GROUP BY a.name ORDER BY plays DESC LIMIT 25"
+    },
+    {
+      "ref": "top-artists-by-minutes",
+      "name": "Top Artists by Minutes",
+      "display": "table",
+      "native_query": "SELECT a.name AS artist, ROUND(SUM(l.duration_ms) / 60000.0) AS minutes FROM listen l JOIN track t ON t.spotify_id = l.track_id JOIN artist a ON a.spotify_id = t.artist_id GROUP BY a.name ORDER BY minutes DESC LIMIT 25"
+    },
+    {
+      "ref": "top-artists-by-unique-songs",
+      "name": "Top Artists by Unique Songs",
+      "display": "table",
+      "native_query": "SELECT a.name AS artist, COUNT(DISTINCT l.track_id) AS unique_songs FROM listen l JOIN track t ON t.spotify_id = l.track_id JOIN artist a ON a.spotify_id = t.artist_id GROUP BY a.name ORDER BY unique_songs DESC LIMIT 25"
+    },
+    {
+      "ref": "top-artists-by-listening-days",
+      "name": "Top Artists by Listening Days",
+      "display": "table",
+      "native_query": "SELECT a.name AS artist, COUNT(DISTINCT DATE(l.started_at)) AS days FROM listen l JOIN track t ON t.spotify_id = l.track_id JOIN artist a ON a.spotify_id = t.artist_id GROUP BY a.name ORDER BY days DESC LIMIT 25"
+    },
+    {
+      "ref": "top-albums-by-plays",
+      "name": "Top Albums by Plays",
+      "display": "table",
+      "native_query": "SELECT al.name AS album, a.name AS artist, COUNT(*) AS plays FROM listen l JOIN track t ON t.spotify_id = l.track_id JOIN album al ON al.spotify_id = t.album_id JOIN artist a ON a.spotify_id = t.artist_id GROUP BY al.name, a.name ORDER BY plays DESC LIMIT 25"
+    },
+    {
+      "ref": "top-albums-by-completion",
+      "name": "Top Albums by Completion",
+      "display": "table",
+      "native_query": "SELECT al.name AS album, a.name AS artist, al.total_tracks, COUNT(DISTINCT l.track_id) AS tracks_heard, ROUND(COUNT(DISTINCT l.track_id)::numeric / NULLIF(al.total_tracks, 0) * 100, 1) AS completion_pct FROM listen l JOIN track t ON t.spotify_id = l.track_id JOIN album al ON al.spotify_id = t.album_id JOIN artist a ON a.spotify_id = t.artist_id WHERE al.total_tracks > 1 GROUP BY al.name, a.name, al.total_tracks ORDER BY completion_pct DESC, tracks_heard DESC LIMIT 25"
+    },
+    {
+      "ref": "top-albums-by-minutes",
+      "name": "Top Albums by Minutes",
+      "display": "table",
+      "native_query": "SELECT al.name AS album, a.name AS artist, ROUND(SUM(l.duration_ms) / 60000.0) AS minutes FROM listen l JOIN track t ON t.spotify_id = l.track_id JOIN album al ON al.spotify_id = t.album_id JOIN artist a ON a.spotify_id = t.artist_id GROUP BY al.name, a.name ORDER BY minutes DESC LIMIT 25"
+    },
+    {
+      "ref": "top-songs-by-plays",
+      "name": "Top Songs by Plays",
+      "display": "table",
+      "native_query": "SELECT t.name AS song, a.name AS artist, COUNT(*) AS plays FROM listen l JOIN track t ON t.spotify_id = l.track_id JOIN artist a ON a.spotify_id = t.artist_id GROUP BY t.name, a.name ORDER BY plays DESC LIMIT 25"
+    },
+    {
+      "ref": "top-songs-by-minutes",
+      "name": "Top Songs by Minutes",
+      "display": "table",
+      "native_query": "SELECT t.name AS song, a.name AS artist, ROUND(SUM(l.duration_ms) / 60000.0) AS minutes FROM listen l JOIN track t ON t.spotify_id = l.track_id JOIN artist a ON a.spotify_id = t.artist_id GROUP BY t.name, a.name ORDER BY minutes DESC LIMIT 25"
+    },
+    {
+      "ref": "top-songs-by-completion",
+      "name": "Top Songs by Completion",
+      "display": "table",
+      "native_query": "SELECT t.name AS song, a.name AS artist, COUNT(*) AS plays, ROUND(AVG(l.progress_ms::numeric / NULLIF(l.duration_track_ms, 0) * 100), 1) AS avg_completion_pct FROM listen l JOIN track t ON t.spotify_id = l.track_id JOIN artist a ON a.spotify_id = t.artist_id GROUP BY t.name, a.name HAVING COUNT(*) >= 3 ORDER BY avg_completion_pct DESC LIMIT 25"
     }
   ],
   "cards": [
-    { "ref": "listens-per-day", "row": 0, "col": 0, "size_x": 24, "size_y": 6 },
-    { "ref": "top-artists",     "row": 6, "col": 0, "size_x": 24, "size_y": 8 },
-    { "type": "heading", "text": "Overview",         "row": 14, "col": 0, "size_x": 24, "size_y": 1 },
     { "ref": "total-hours",              "row": 15, "col": 0,  "size_x": 6, "size_y": 3 },
     { "ref": "total-unique-songs",       "row": 15, "col": 6,  "size_x": 6, "size_y": 3 },
     { "ref": "total-unique-albums",      "row": 15, "col": 12, "size_x": 6, "size_y": 3 },
@@ -293,6 +330,19 @@
     { "ref": "least-skipped-songs",      "row": 79, "col": 12, "size_x": 12, "size_y": 8 },
     { "ref": "artists-highest-skip-rate","row": 87, "col": 0,  "size_x": 12, "size_y": 8 },
     { "ref": "frequently-abandoned",     "row": 87, "col": 12, "size_x": 12, "size_y": 8 },
-    { "ref": "album-completion-rate",    "row": 95, "col": 0,  "size_x": 24, "size_y": 8 }
+    { "ref": "album-completion-rate",    "row": 95, "col": 0,  "size_x": 24, "size_y": 8 },
+    { "type": "heading", "text": "Artist Rankings", "row": 103, "col": 0, "size_x": 24, "size_y": 1 },
+    { "ref": "top-artists-by-plays",         "row": 104, "col": 0,  "size_x": 12, "size_y": 10 },
+    { "ref": "top-artists-by-minutes",       "row": 104, "col": 12, "size_x": 12, "size_y": 10 },
+    { "ref": "top-artists-by-unique-songs",  "row": 114, "col": 0,  "size_x": 12, "size_y": 10 },
+    { "ref": "top-artists-by-listening-days","row": 114, "col": 12, "size_x": 12, "size_y": 10 },
+    { "type": "heading", "text": "Album Rankings", "row": 124, "col": 0, "size_x": 24, "size_y": 1 },
+    { "ref": "top-albums-by-plays",          "row": 125, "col": 0,  "size_x": 12, "size_y": 10 },
+    { "ref": "top-albums-by-minutes",        "row": 125, "col": 12, "size_x": 12, "size_y": 10 },
+    { "ref": "top-albums-by-completion",     "row": 135, "col": 0,  "size_x": 24, "size_y": 10 },
+    { "type": "heading", "text": "Song Rankings", "row": 145, "col": 0, "size_x": 24, "size_y": 1 },
+    { "ref": "top-songs-by-plays",           "row": 146, "col": 0,  "size_x": 12, "size_y": 10 },
+    { "ref": "top-songs-by-minutes",         "row": 146, "col": 12, "size_x": 12, "size_y": 10 },
+    { "ref": "top-songs-by-completion",      "row": 156, "col": 0,  "size_x": 24, "size_y": 10 }
   ]
 }

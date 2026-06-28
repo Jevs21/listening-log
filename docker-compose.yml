@@ -46,6 +46,7 @@ services:
       DATABASE_URL: postgres://listening_log:listening_log@db:5432/listening_log?sslmode=disable
     volumes:
       - metabase-shared:/shared:ro
+      - ./backups:/data
     depends_on:
       db:
         condition: service_healthy

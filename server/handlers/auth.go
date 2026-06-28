@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"log"
 	"net/http"
+	"strings"
 
 	"listening-log/server/config"
 	"listening-log/server/db"
@@ -18,18 +19,57 @@ type AuthHandler struct {
 	Cfg config.Config
 }
 
+func buildBaseURL(c *gin.Context) string {
+	scheme := c.GetHeader("X-Forwarded-Proto")
+	if scheme == "" {
+		scheme = c.GetHeader("X-Forwarded-Scheme")
+	}
+	if scheme == "" {
+		if c.Request.TLS != nil {
+			scheme = "https"
+		} else {
+			scheme = "http"
+		}
+	}
+
+	host := c.GetHeader("X-Forwarded-Host")
+	if host == "" {
+		host = c.Request.Host
+	}
+
+	return scheme + "://" + host
+}
+
 func (h *AuthHandler) Login(c *gin.Context) {
 	state := randomState()
+	baseURL := buildBaseURL(c)
+	cookieValue := state + "|" + baseURL
 	c.SetSameSite(http.SameSiteLaxMode)
-	c.SetCookie("oauth_state", state, 300, "/", "", false, true)
-	url := spotify.AuthorizeURL(h.Cfg.ClientID, h.Cfg.SpotifyRedirectURI, state)
+	c.SetCookie("oauth_state", cookieValue, 300, "/", "", false, true)
+
+	redirectURI := baseURL + "/api/auth/callback"
+	url := spotify.AuthorizeURL(h.Cfg.ClientID, redirectURI, state)
 	c.Redirect(http.StatusFound, url)
 }
 
 func (h *AuthHandler) Callback(c *gin.Context) {
+	// Recover state and base URL from cookie
+	cookieValue, err := c.Cookie("oauth_state")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "missing oauth state"})
+		return
+	}
+
+	parts := strings.SplitN(cookieValue, "|", 2)
+	if len(parts) != 2 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid oauth state"})
+		return
+	}
+	savedState := parts[0]
+	baseURL := parts[1]
+
 	// Verify state
-	cookieState, err := c.Cookie("oauth_state")
-	if err != nil || cookieState != c.Query("state") {
+	if savedState != c.Query("state") {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "state mismatch"})
 		return
 	}
@@ -44,7 +84,8 @@ func (h *AuthHandler) Callback(c *gin.Context) {
 		return
 	}
 
-	token, err := spotify.ExchangeCode(h.Cfg.ClientID, h.Cfg.ClientSecret, code, h.Cfg.SpotifyRedirectURI)
+	redirectURI := baseURL + "/api/auth/callback"
+	token, err := spotify.ExchangeCode(h.Cfg.ClientID, h.Cfg.ClientSecret, code, redirectURI)
 	if err != nil {
 		log.Printf("token exchange error: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "token exchange failed"})
@@ -61,7 +102,7 @@ func (h *AuthHandler) Callback(c *gin.Context) {
 
 	if h.Cfg.SpotifyAllowedUserID != "" && profile.ID != h.Cfg.SpotifyAllowedUserID {
 		log.Printf("spotify auth rejected: user_id=%s not allowed", profile.ID)
-		c.Redirect(http.StatusFound, redirectURL(h.Cfg.ClientBaseURL))
+		c.Redirect(http.StatusFound, baseURL+"/")
 		return
 	}
 
@@ -77,7 +118,7 @@ func (h *AuthHandler) Callback(c *gin.Context) {
 		return
 	}
 
-	c.Redirect(http.StatusFound, redirectURL(h.Cfg.ClientBaseURL))
+	c.Redirect(http.StatusFound, baseURL+"/")
 }
 
 func (h *AuthHandler) Status(c *gin.Context) {
@@ -91,13 +132,6 @@ func (h *AuthHandler) Status(c *gin.Context) {
 
 func Health(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "ok"})
-}
-
-func redirectURL(base string) string {
-	if base == "" {
-		return "/"
-	}
-	return base
 }
 
 func randomState() string {

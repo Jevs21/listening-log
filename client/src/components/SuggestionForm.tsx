@@ -31,11 +31,15 @@ export function SuggestionForm({ source, onSuccess }: Props) {
     }
   }
 
-  const canSubmit = link.trim() !== "" && isValidUrl(link.trim()) && !submitting;
+  const linkTrimmed = link.trim();
+  const messageTrimmed = message.trim();
+  const linkValid = linkTrimmed === "" || isValidUrl(linkTrimmed);
+  const hasContent = linkTrimmed !== "" || messageTrimmed !== "";
+  const canSubmit = hasContent && linkValid && !submitting;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!isValidUrl(link.trim())) {
+    if (linkTrimmed !== "" && !isValidUrl(linkTrimmed)) {
       setError("please enter a valid url");
       return;
     }
@@ -68,7 +72,7 @@ export function SuggestionForm({ source, onSuccess }: Props) {
         className="suggestion-input"
         value={link}
         onChange={(e) => setLink(e.target.value)}
-        placeholder="spotify, apple music, or youtube link"
+        placeholder="spotify, youtube, or any link (optional)"
         maxLength={2048}
         style={{ marginBottom: "0.75rem" }}
       />
@@ -76,7 +80,7 @@ export function SuggestionForm({ source, onSuccess }: Props) {
         className="suggestion-input"
         value={message}
         onChange={(e) => setMessage(e.target.value)}
-        placeholder="leave a message (optional)"
+        placeholder="song name, artist, or a message"
         maxLength={200}
         rows={3}
         style={{ resize: "none" }}

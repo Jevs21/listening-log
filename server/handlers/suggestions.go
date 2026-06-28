@@ -41,18 +41,20 @@ func SubmitSuggestion(database *db.DB) gin.HandlerFunc {
 		req.Link = strings.TrimSpace(req.Link)
 		req.Message = strings.TrimSpace(req.Message)
 
-		if req.Link == "" {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "link is required"})
+		if req.Link == "" && req.Message == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "link or message is required"})
 			return
 		}
-		parsed, err := url.ParseRequestURI(req.Link)
-		if err != nil || (parsed.Scheme != "http" && parsed.Scheme != "https") || parsed.Host == "" {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "link must be a valid url"})
-			return
-		}
-		if len(req.Link) > 2048 {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "link is too long"})
-			return
+		if req.Link != "" {
+			parsed, err := url.ParseRequestURI(req.Link)
+			if err != nil || (parsed.Scheme != "http" && parsed.Scheme != "https") || parsed.Host == "" {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "link must be a valid url"})
+				return
+			}
+			if len(req.Link) > 2048 {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "link is too long"})
+				return
+			}
 		}
 		if len(req.Message) > 200 {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "message is too long"})

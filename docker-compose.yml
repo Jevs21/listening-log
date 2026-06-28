@@ -40,7 +40,7 @@ services:
   app:
     build: .
     ports:
-      - "8080:8080"
+      - "${PORT:-8080}:8080"
     env_file: .env
     environment:
       DATABASE_URL: postgres://listening_log:listening_log@db:5432/listening_log?sslmode=disable
@@ -54,7 +54,7 @@ services:
   metabase:
     image: metabase/metabase:latest
     ports:
-      - "3000:3000"
+      - "${METABASE_PORT:-3000}:3000"
     environment:
       MB_DB_TYPE: h2
       MB_JETTY_HOST: 0.0.0.0

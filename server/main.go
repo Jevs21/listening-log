@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"listening-log/server/analysis"
@@ -58,7 +59,8 @@ func main() {
 	r.GET("/api/image-grid", handlers.ImageGrid(database))
 	r.POST("/api/suggestions", handlers.SubmitSuggestion(database))
 	r.GET("/api/suggestions/check", handlers.CheckSuggestion(database))
-	r.GET("/api/stats/dashboard", handlers.DashboardURL(cfg.MetabaseURL))
+	r.GET("/api/stats/dashboard", handlers.DashboardURL())
+	r.Any("/metabase/*path", handlers.MetabaseProxy("http://metabase:3000"))
 
 	// Serve built client in prod (if client/dist exists)
 	// Check ../client/dist first (running from server/), then /client/dist (Docker)
@@ -79,8 +81,8 @@ func spaMiddleware(staticDir string) gin.HandlerFunc {
 	fileServer := http.FileServer(fs)
 
 	return func(c *gin.Context) {
-		// Skip API routes
-		if len(c.Request.URL.Path) >= 4 && c.Request.URL.Path[:4] == "/api" {
+		// Skip API and Metabase proxy routes
+		if strings.HasPrefix(c.Request.URL.Path, "/api") || strings.HasPrefix(c.Request.URL.Path, "/metabase") {
 			c.Next()
 			return
 		}

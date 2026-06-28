@@ -10,7 +10,6 @@ type Config struct {
 	Port                 string
 	DatabaseURL          string
 	SpotifyAllowedUserID string
-	MetabaseURL          string
 }
 
 func Load() Config {
@@ -22,7 +21,6 @@ func Load() Config {
 		Port:                 os.Getenv("PORT"),
 		DatabaseURL:          os.Getenv("DATABASE_URL"),
 		SpotifyAllowedUserID: os.Getenv("SPOTIFY_ALLOWED_USER_ID"),
-		MetabaseURL:          os.Getenv("METABASE_URL"),
 	}
 
 	if c.Port == "" {
@@ -33,9 +31,6 @@ func Load() Config {
 	}
 	if c.SpotifyRedirectURI == "" {
 		c.SpotifyRedirectURI = "http://127.0.0.1:8080/api/auth/callback"
-	}
-	if c.MetabaseURL == "" {
-		c.MetabaseURL = "http://localhost:3000"
 	}
 
 	return c

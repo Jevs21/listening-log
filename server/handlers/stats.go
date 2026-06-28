@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func DashboardURL(metabaseURL string) gin.HandlerFunc {
+func DashboardURL() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		uuid, err := os.ReadFile("/shared/dashboard-uuid")
 		if err != nil {
@@ -17,8 +17,7 @@ func DashboardURL(metabaseURL string) gin.HandlerFunc {
 			return
 		}
 
-		url := fmt.Sprintf("%s/public/dashboard/%s#theme=night&background=false&bordered=false&titled=false",
-			strings.TrimRight(metabaseURL, "/"),
+		url := fmt.Sprintf("/metabase/public/dashboard/%s#theme=night&background=false&bordered=false&titled=false",
 			strings.TrimSpace(string(uuid)),
 		)
 
